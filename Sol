@@ -1,0 +1,223 @@
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Solution {
+	static int [][] queenOffsets = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}, 
+			{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+	static int [][] rookOffsets = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	static int [][] bishopOffsets = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+	static int [][] knightOffsets = {{-2, -1}, {-1, -2}, {-2, 1}, {-1, 2},
+			{2, -1}, {1, -2}, {2, 1}, {1, 2}};
+	
+	static abstract class Piece implements Cloneable {
+		int x;
+		int y;
+		boolean isWhite;
+		int [][] offsets;
+		
+		public Piece(int x, int y, boolean isWhite, int [][] offsets) {
+			super();
+			this.x = x;
+			this.y = y;
+			this.isWhite = isWhite;
+			this.offsets = offsets;
+		}
+
+		@Override
+		protected Object clone() throws CloneNotSupportedException {
+			return super.clone();
+		}
+
+		List<Point> getMoves(Piece[][] board) {
+			List<Point> pts = new ArrayList<>();
+			outer:
+			for(int off = 0; off < offsets.length; off++) {
+				for(int d = 1; d < 4; d++) {
+					int nx = x + offsets[off][0] * d;
+					int ny = y + offsets[off][1] * d;
+					if (nx < 0 || nx >= 4 || ny < 0 || ny >= 4)
+						continue outer;
+					if (board[nx][ny] != null && board[nx][ny].isWhite == this.isWhite)
+						continue outer;
+					
+					pts.add(new Point(nx, ny));
+					
+					if (board[nx][ny] != null)
+						continue outer;
+				}
+			}
+			
+			return pts;
+		}
+	}
+	
+	static class Queen extends Piece {
+		public Queen(int x, int y, boolean isWhite) {
+			super(x, y, isWhite, queenOffsets);
+		}
+	}
+	
+	static class Bishop extends Piece {
+		public Bishop(int x, int y, boolean isWhite) {
+			super(x, y, isWhite, bishopOffsets);
+		}
+	}
+	
+	static class Rook extends Piece {
+		public Rook(int x, int y, boolean isWhite) {
+			super(x, y, isWhite, rookOffsets);
+		}
+	}
+	
+	static class Knight extends Piece {
+		public Knight(int x, int y, boolean isWhite) {
+			super(x, y, isWhite, knightOffsets);
+		}
+
+		@Override
+		List<Point> getMoves(Piece[][] board) {
+			List<Point> pts = new ArrayList<>();
+			for(int off = 0; off < offsets.length; off++) {
+				int nx = x + offsets[off][0];
+				int ny = y + offsets[off][1];
+				if (nx < 0 || nx >= 4 || ny < 0 || ny >= 4)
+					continue;
+				if (board[nx][ny] != null && board[nx][ny].isWhite == this.isWhite)
+					continue;
+				
+				pts.add(new Point(nx, ny));
+			}
+			
+			return pts;
+		}
+	}
+	
+	static void addPiece(Scanner in, Piece[][] board, boolean isWhite) {
+		String type = in.next();
+		String col = in.next();
+		int x = col.charAt(0) - 'A';
+		int y = in.nextInt() - 1;
+		
+		Piece p = null;
+		switch(type.charAt(0)) {
+		case 'Q': p = new Queen(x, y, isWhite); break;
+		case 'B': p = new Bishop(x, y, isWhite); break;
+		case 'R': p = new Rook(x, y, isWhite); break;
+		case 'N': p = new Knight(x, y, isWhite); break;
+		}
+		
+		board[p.x][p.y] = p;
+	}
+	
+	static Piece [][] copyBoard(Piece [][] b) {
+		Piece [][] b2 = new Piece[4][4];
+		
+		try {
+			for(int i = 0; i < 4; i++) {
+				for(int j = 0; j < 4; j++) {
+					if (b[i][j] != null)
+						b2[i][j] = (Piece)b[i][j].clone();
+				}
+			}
+		}
+		catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+		return b2;
+	}
+	
+	static Piece makeMove(Piece[][] board, Piece p, Point dest) {
+		Piece captured = board[dest.x][dest.y];
+		
+		board[dest.x][dest.y] = p;
+		board[p.x][p.y] = null;
+		p.x = dest.x;
+		p.y = dest.y;
+		
+		return captured;
+	}
+	
+	static List<Piece> getPieces(Piece [][] board, boolean isWhite) {
+		List<Piece> list = new ArrayList<>();
+		for(int i = 0; i < 4; i++) {
+			for(int j = 0; j < 4; j++) {
+				Piece p = board[i][j];
+				if (p != null && p.isWhite == isWhite)
+					list.add(p);
+			}
+		}
+		
+		return list;
+	}
+	
+	public static boolean canSolveBlack(Piece[][] board, int num) {
+		if (num == 0)
+			return false;
+		
+		List<Piece> pieces = getPieces(board, false);
+		
+		for(Piece p : pieces) {
+			for(Point dest : p.getMoves(board)) {
+				Piece [][] b2 = copyBoard(board);
+				Piece p2 = b2[p.x][p.y];
+				
+				Piece captured = makeMove(b2, p2, dest);
+				if (captured instanceof Queen)
+					return false;
+				
+				if (!canSolveWhite(b2, num - 1))
+					return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public static boolean canSolveWhite(Piece[][] board, int num) {
+		if (num == 0)
+			return false;
+		
+		List<Piece> pieces = getPieces(board, true);
+		
+		for(Piece p : pieces) {
+			for(Point dest : p.getMoves(board)) {
+				Piece [][] b2 = copyBoard(board);
+				Piece p2 = b2[p.x][p.y];
+				
+				Piece captured = makeMove(b2, p2, dest);
+				if (captured instanceof Queen)
+					return true;
+				
+				if (canSolveBlack(b2, num - 1)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	public static void main(String[] args) {
+		Scanner in = new Scanner(System.in);
+		int t = in.nextInt();
+		trial:
+		for (int tr = 0; tr < t; tr++) {
+			int w = in.nextInt();
+			int b = in.nextInt();
+			int m = in.nextInt();
+			
+			Piece[][] board = new Piece[4][4];
+			for(int i = 0; i < w; i++) {
+				addPiece(in, board, true);
+			}
+			for(int i = 0; i < b; i++) {
+				addPiece(in, board, false);
+			}
+			
+			System.out.println(canSolveWhite(board, m) ? "YES" : "NO");
+		}
+	}
+}
