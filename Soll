@@ -1,1 +1,295 @@
+ 
+ 
+ 
+ 
 
+
+ 
+
+//package Awesome;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.awt.Point;
+import java.io.*;
+import java.io.ObjectInputStream.GetField;
+import java.math.BigInteger;
+import java.sql.Array;
+import java.util.*;
+
+class TestClass {
+
+static long mod ;
+static ArrayList<Integer>[] M;
+static int n ;
+static int k;
+static int[] A;
+static int[] S;   
+static int[] N;
+static boolean[] V;
+static int[][] dp;
+static int[] P;
+static int[] Count;
+static int pos=0;
+static ArrayList<Integer> r;
+
+
+public static class Batman{
+	   
+	  
+	   int r;
+	   int c1;
+	   int c2;
+	public Batman(int r, int c1, int c2) {
+		
+		this.r = r;
+		this.c1 = c1;
+		this.c2 = c2;
+	}
+	  
+
+	   
+	    
+}
+
+
+public static void update(int i,int v){
+	       
+	while(i<A.length){
+		A[i]+=v;
+		i+=i&-i;
+	}
+}
+
+public static int ans(int i){
+	
+	  int o=0;
+	  while(i>0){
+		  o+=A[i];
+		  i-=i&-i;
+	  }
+	  
+	  return o;
+}
+
+public static void main(String args[] ) throws java.lang.Exception {
+
+
+
+InputStream inputStream = System.in;
+InputReader in = new InputReader(inputStream);
+
+//BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+//BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\Sompathak\\Desktop\\yes.txt"));
+//Scanner in = new Scanner(new FileReader("C:\\Users\\Sompathak\\Desktop\\yes.java"));
+//PrintWriter pw = new PrintWriter(new FileWriter("C:\\Users\\sompatha\\Desktop\\output.txt"));
+//InputStream inputStream = System.in;
+//InputReader in = new InputReader(inputStream);
+//Scanner in = new Scanner(new InputStreamReader(System.in));
+//Scanner in = new Scanner(new FileReader("C:\\Users\\sompatha\\Desktop\\yes.txt"));
+//we can we will ??? !!!!!! SOM RISES
+//long startTime = System.currentTimeMillis();
+//long startTime = System.currentTimeMillis();
+
+//float endTime   = System.currentTimeMillis();
+//float totalTime = (endTime - startTime)/(float)1000;
+//System.out.println(totalTime+" sec....."); 
+
+//in.hasNext()
+mod = (long) (1e9+7);
+int n = in.nextInt();
+int m = in.nextInt();
+int k = in.nextInt();
+long ans = 1l*n*m;
+Batman[] Q = new Batman[k];
+for(int i=0;i<k;i++) Q[i] = new Batman(in.nextInt(),in.nextInt(),in.nextInt());
+Arrays.sort(Q,new Comparator<Batman>() {
+
+	@Override
+	public int compare(Batman o1, Batman o2) {
+		// TODO Auto-generated method stub
+		if(o1.r==o2.r){
+			
+			if(o1.c1==o2.c1) return o2.c2-o1.c2;
+			
+			return o1.c1-o2.c1;
+		}
+		
+		return o1.r-o2.r;
+	}
+});
+int row=-1;
+int end=0;
+for(int i=0;i<k;i++){
+	
+	  if(Q[i].r==row){
+		  
+		  if(Q[i].c2<=end) continue;
+          
+          if(end>=Q[i].c1)
+		  ans-= (Q[i].c2-end);
+          else 
+          ans-= (Q[i].c2-Q[i].c1+1);    
+		  end = Q[i].c2;
+		  
+	  }else{
+		  row = Q[i].r;
+		  end = Q[i].c2;
+		  ans-= (Q[i].c2-Q[i].c1+1);
+	  }
+}
+System.out.println(ans);
+
+}public static class InputReader
+{
+private InputStream stream;
+private byte[] buf = new byte[1024];
+private int curChar;
+private int numChars;
+private SpaceCharFilter filter;
+
+public InputReader(InputStream stream)
+{
+this.stream = stream;
+}
+
+public int read()
+{
+if (numChars == -1)
+throw new InputMismatchException();
+if (curChar >= numChars)
+{
+curChar = 0;
+try
+{
+numChars = stream.read(buf);
+} catch (IOException e)
+{
+throw new InputMismatchException();
+}
+if (numChars <= 0)
+return -1;
+}
+return buf[curChar++];
+}
+
+public int nextInt()
+{
+int c = read();
+while (isSpaceChar(c))
+c = read();
+int sgn = 1;
+if (c == '-')
+{
+sgn = -1;
+c = read();
+}
+int res = 0;
+do
+{
+if (c < '0' || c > '9')
+throw new InputMismatchException();
+res *= 10;
+res += c - '0';
+c = read();
+} while (!isSpaceChar(c));
+return res * sgn;
+}
+
+public String readString()
+{
+int c = read();
+while (isSpaceChar(c))
+c = read();
+StringBuilder res = new StringBuilder();
+do
+{
+res.appendCodePoint(c);
+c = read();
+} while (!isSpaceChar(c));
+return res.toString();
+}
+public double readDouble() {
+int c = read();
+while (isSpaceChar(c))
+c = read();
+int sgn = 1;
+if (c == '-') {
+sgn = -1;
+c = read();
+}
+double res = 0;
+while (!isSpaceChar(c) && c != '.') {
+if (c == 'e' || c == 'E')
+return res * Math.pow(10, nextInt());
+if (c < '0' || c > '9')
+throw new InputMismatchException();
+res *= 10;
+res += c - '0';
+c = read();
+}
+if (c == '.') {
+c = read();
+double m = 1;
+while (!isSpaceChar(c)) {
+if (c == 'e' || c == 'E')
+return res * Math.pow(10, nextInt());
+if (c < '0' || c > '9')
+throw new InputMismatchException();
+m /= 10;
+res += (c - '0') * m;
+c = read();
+}
+}
+return res * sgn;
+}
+public long readLong() {
+int c = read();
+while (isSpaceChar(c))
+c = read();
+int sgn = 1;
+if (c == '-') {
+sgn = -1;
+c = read();
+}
+long res = 0;
+do {
+if (c < '0' || c > '9')
+throw new InputMismatchException();
+res *= 10;
+res += c - '0';
+c = read();
+} while (!isSpaceChar(c));
+return res * sgn;
+}
+public boolean isSpaceChar(int c)
+{
+if (filter != null)
+return filter.isSpaceChar(c);
+return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == -1;
+}
+
+public String next()
+{
+return readString();
+}
+
+public interface SpaceCharFilter
+{
+public boolean isSpaceChar(int ch);
+}
+}
+}                                                                                                               
