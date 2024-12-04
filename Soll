@@ -114,3 +114,130 @@ public class Main implements Runnable {
         new Thread(new Main()).start();
     }
 }
+
+
+
+
+
+
+
+
+import java.util.*;
+
+class PasswordChecker {
+
+    private Set<String> passwordSet = null;
+    private Set<Integer> alreadyTested = null;
+
+    public PasswordChecker(Collection<String> passwordSet) {
+        this.passwordSet = new TreeSet<>(passwordSet);
+        this.alreadyTested = new HashSet<>();
+    }
+
+
+    /* Sanity checks */
+    private boolean containsBackstring(String password) {
+        for (String s: this.passwordSet) {
+            if (password.endsWith(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Set<Character> getAllCharactersFrom(String str) {
+        Set<Character> result = new HashSet<>();
+        for (char c: str.toCharArray()) {
+            result.add(c);
+        }
+        return result;
+    }
+
+    private boolean allLegalCharacters(String password) {
+        Set<Character> legalChars = getAllCharactersFrom(String.join("", this.passwordSet));
+
+        for (char c: password.toCharArray()) {
+            if (! legalChars.contains(c)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public List<String> is_valid_password(String password) {
+        /* Do some initial sanity checking to prevent pointless recursion :) */
+        if (containsBackstring(password) &&
+            allLegalCharacters(password)
+        ) {
+            return is_valid_password(password, 0);
+        } else {
+            return null;
+        }
+    }
+
+    private List<String> is_valid_password(String password, int index) {
+
+        if (index == password.length()) {
+            return new LinkedList<>();
+        }
+        if (index > password.length()) {
+            return null;
+        }
+        if (alreadyTested.contains(index)) {
+            return null;
+        }
+        alreadyTested.add(index);
+
+        List<String> candidatePasswords = new ArrayList<>();
+
+        for (String possibleMatch: this.passwordSet) {
+            if (! password.startsWith(possibleMatch, index)) {
+                continue;
+            }
+
+            final String candidate = possibleMatch;
+
+            List<String> recursiveResult = this.is_valid_password(password, index + candidate.length());
+            if (recursiveResult != null) {
+                recursiveResult.add(0, candidate);
+                return recursiveResult;
+            }
+        }
+
+        return null;
+    }
+
+}
+
+public class Main {
+
+    public static void main(String [] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        int numberTests = Integer.parseInt(sc.nextLine());
+
+        for (int i = 0; i < numberTests; i++) {
+
+            int numberWords = Integer.parseInt(sc.nextLine());
+            String [] words = sc.nextLine().split(" ");
+            Set<String> wordSet = new HashSet<>();
+            for (int j = 0; j < words.length; j++) {
+                wordSet.add(words[j]);
+            }
+
+            String testphrase = sc.nextLine().trim();
+            List<String> result = new PasswordChecker(wordSet).is_valid_password(testphrase);
+
+            if (result == null) {
+                System.out.println("WRONG PASSWORD");
+            } else {
+                System.out.println(String.join(" ", result));
+            }
+
+        }
+
+    }
+
+}
