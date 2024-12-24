@@ -2,9 +2,9 @@ int CalLargestBlock(int id_ignore) {
 
 int max_block_size = 0;
 
-int cur size = 0;
+int cur_size = 0;
 
-int ptri=0;
+int ptr1=0;
 
 int ptr2=0;
 
@@ -43,10 +43,8 @@ break;
 }
 
 ptr1++;
-
-}
-
 count++;
+}
 
 max_block_size=Math.max(max_block_size,count);
 
