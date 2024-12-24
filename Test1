@@ -1,0 +1,61 @@
+int CalLargestBlock(int id_ignore) {
+
+int max_block_size = 0;
+
+int cur size = 0;
+
+int ptri=0;
+
+int ptr2=0;
+
+int count=0;
+
+while(ptr1<N&&ptr2<N){
+
+if(ID[ptr2]==id_ignore){
+
+ptr2++;
+
+ptr1=ptr2;
+
+}
+
+else{
+
+while(ptr1<N) {
+
+if(ID[ptr1]==id_ignore)
+
+{
+
+ptr1++;
+
+continue;
+
+}
+
+if(ID[ptr1]!=ID[ptr2]){
+
+ptr1++;
+
+break;
+
+}
+
+ptr1++;
+
+}
+
+count++;
+
+max_block_size=Math.max(max_block_size,count);
+
+count=0;
+
+ptr2=ptr1;
+
+}
+
+}
+return max_block_size;
+}
