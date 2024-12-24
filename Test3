@@ -1,0 +1,115 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
+
+public class Main {
+    int R, C;
+    char[][] map;
+    List<Point> points; // List of important points (S, 1, 2, ..., n)
+    int[][] dist; // Distance matrix between important points
+    int[][] dp; // DP table for TSP
+
+    // Represents a point on the map
+    static class Point {
+        int x, y;
+        Point(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    // Directions for BFS (up, down, left, right)
+    int[] dx = {-1, 1, 0, 0};
+    int[] dy = {0, 0, -1, 1};
+
+    void inputData() throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        R = Integer.parseInt(st.nextToken());
+        C = Integer.parseInt(st.nextToken());
+        map = new char[R][];
+        points = new ArrayList<>();
+
+        for (int r = 0; r < R; r++) {
+            map[r] = br.readLine().toCharArray();
+            for (int c = 0; c < C; c++) {
+                if (map[r][c] == 'S') {
+                    points.add(0, new Point(r, c)); // Add starting point as the first point
+                } else if (Character.isDigit(map[r][c])) {
+                    points.add(new Point(r, c)); // Add exploration points
+                }
+            }
+        }
+    }
+
+    // Perform BFS to calculate shortest distances from a given point to all others
+    void bfs(int startIdx) {
+        Point start = points.get(startIdx);
+        Queue<Point> queue = new LinkedList<>();
+        boolean[][] visited = new boolean[R][C];
+        int[][] localDist = new int[R][C];
+
+        queue.add(start);
+        visited[start.x][start.y] = true;
+
+        while (!queue.isEmpty()) {
+            Point current = queue.poll();
+            for (int d = 0; d < 4; d++) {
+                int nx = current.x + dx[d];
+                int ny = current.y + dy[d];
+                if (nx >= 0 && nx < R && ny >= 0 && ny < C && !visited[nx][ny] && map[nx][ny] != '*') {
+                    visited[nx][ny] = true;
+                    localDist[nx][ny] = localDist[current.x][current.y] + 1;
+                    queue.add(new Point(nx, ny));
+                }
+            }
+        }
+
+        // Update the distance matrix
+        for (int i = 0; i < points.size(); i++) {
+            Point p = points.get(i);
+            dist[startIdx][i] = localDist[p.x][p.y];
+        }
+    }
+
+    // Solve the Traveling Salesman Problem using bitmasking and dynamic programming
+    int tsp(int current, int visited) {
+        if (visited == (1 << points.size()) - 1) {
+            return dist[current][0]; // Return to the starting point
+        }
+        if (dp[current][visited] != -1) {
+            return dp[current][visited];
+        }
+
+        int minDist = Integer.MAX_VALUE;
+        for (int next = 0; next < points.size(); next++) {
+            if ((visited & (1 << next)) == 0) { // If `next` point is not visited
+                int newDist = dist[current][next] + tsp(next, visited | (1 << next));
+                minDist = Math.min(minDist, newDist);
+            }
+        }
+        dp[current][visited] = minDist;
+        return minDist;
+    }
+
+    public static void main(String[] args) throws Exception {
+        Main m = new Main();
+        m.inputData(); // Input the map and points
+
+        int n = m.points.size();
+        m.dist = new int[n][n];
+        m.dp = new int[n][1 << n];
+        for (int[] row : m.dp) {
+            Arrays.fill(row, -1);
+        }
+
+        // Calculate distances between all pairs of points
+        for (int i = 0; i < n; i++) {
+            m.bfs(i);
+        }
+
+        // Solve TSP starting from point 0 ('S')
+        int ans = m.tsp(0, 1);
+        System.out.println(ans); // Output the minimum travel distance
+    }
+}
