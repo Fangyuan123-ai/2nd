@@ -50,3 +50,64 @@ public class Main {
         }
     }
 }
+
+
+
+import java.util.Scanner;
+import java.util.Stack;
+
+public class Main {
+
+    static int N; // Number of players
+    static long T; // Time in minutes
+    static long[] P; // Player initial positions
+    static long[] S; // Player speeds
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Input the number of players and time
+        N = sc.nextInt();
+        T = sc.nextLong();
+
+        P = new long[N];
+        S = new long[N];
+
+        // Input the initial positions and speeds
+        for (int i = 0; i < N; i++) {
+            P[i] = sc.nextLong();
+            S[i] = sc.nextLong();
+        }
+
+        sc.close();
+
+        // Stack to keep track of group leaders (in reverse order initially)
+        Stack<Integer> stack = new Stack<>();
+
+        // Add the last player as the first group leader
+        stack.push(N - 1);
+
+        // Traverse from second-to-last player to the first
+        for (int i = N - 2; i >= 0; i--) {
+            // Get the current leader of the last group
+            int leader = stack.peek();
+
+            // Calculate the positions at time T
+            long currentPosition = P[i] + S[i] * T;
+            long leaderPosition = P[leader] + S[leader] * T;
+
+            // If the current player cannot catch up with the leader, form a new group
+            if (currentPosition < leaderPosition) {
+                stack.push(i);
+            }
+        }
+
+        // Output the number of groups
+        System.out.println(stack.size());
+
+        // Output the indices of group leaders in the correct order
+        while (!stack.isEmpty()) {
+            System.out.print((stack.pop() + 1) + " ");
+        }
+    }
+}
