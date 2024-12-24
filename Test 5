@@ -1,0 +1,100 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    int N;
+    char[][] map;
+    char ans; // Buyer's name
+    int areacnt; // Buyer's number of zones
+
+    void InputData() throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        N = Integer.parseInt(bf.readLine());
+        map = new char[N][N];
+        for (int i = 0; i < N; i++) {
+            map[i] = bf.readLine().toCharArray();
+        }
+        bf.close();
+    }
+
+    boolean[][] visited;
+    int[] dR = {-1, 1, 0, 0}; // Row direction (up, down)
+    int[] dC = {0, 0, -1, 1}; // Column direction (left, right)
+
+    // BFS for exploring a zone
+    int bfs(int r, int c, char owner) {
+        Queue<int[]> queue = new LinkedList<>();
+        queue.add(new int[]{r, c});
+        visited[r][c] = true;
+        int size = 0;
+
+        while (!queue.isEmpty()) {
+            int[] curr = queue.poll();
+            size++;
+            for (int i = 0; i < 4; i++) {
+                int newR = curr[0] + dR[i];
+                int newC = curr[1] + dC[i];
+                if (newR >= 0 && newR < N && newC >= 0 && newC < N &&
+                    !visited[newR][newC] && map[newR][newC] == owner) {
+                    visited[newR][newC] = true;
+                    queue.add(new int[]{newR, newC});
+                }
+            }
+        }
+        return size;
+    }
+
+    void Solve() {
+        visited = new boolean[N][N];
+        Map<Character, Integer> zoneCount = new HashMap<>();
+        Map<Character, Integer> gridCount = new HashMap<>();
+
+        // Initialize counts for R, G, B
+        zoneCount.put('R', 0);
+        zoneCount.put('G', 0);
+        zoneCount.put('B', 0);
+        gridCount.put('R', 0);
+        gridCount.put('G', 0);
+        gridCount.put('B', 0);
+
+        // Explore the map
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                if (!visited[r][c]) {
+                    char owner = map[r][c];
+                    zoneCount.put(owner, zoneCount.get(owner) + 1);
+                    gridCount.put(owner, gridCount.get(owner) + bfs(r, c, owner));
+                }
+            }
+        }
+
+        // Determine the result based on the conditions
+        ans = 'R'; // Default to R
+        areacnt = zoneCount.get('R');
+        int maxGrids = gridCount.get('R');
+
+        if (zoneCount.get('G') > areacnt || 
+            (zoneCount.get('G') == areacnt && gridCount.get('G') > maxGrids)) {
+            ans = 'G';
+            areacnt = zoneCount.get('G');
+            maxGrids = gridCount.get('G');
+        }
+        if (zoneCount.get('B') > areacnt || 
+            (zoneCount.get('B') == areacnt && gridCount.get('B') > maxGrids)) {
+            ans = 'B';
+            areacnt = zoneCount.get('B');
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        Main m = new Main();
+        m.InputData(); // Input
+        m.Solve(); // Solve
+
+        // Output
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        bw.write(String.valueOf(m.ans) + " " + String.valueOf(m.areacnt) + "\n");
+        bw.flush();
+        bw.close();
+    }
+}
