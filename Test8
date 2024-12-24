@@ -34,7 +34,7 @@ public class Main {
 
             // If the current player cannot catch up with the next player, they form a new group
             if (currentPosition < nextPosition) {
-                group_first[groupCount++] = i + 1;
+                group_first[groupCount++] = i + 1; // Store the player number (1-based index)
             } else {
                 // Synchronize the speed of the current player to the group's leader
                 S[i] = S[i + 1];
@@ -43,7 +43,7 @@ public class Main {
 
         // Output the results
         System.out.println(groupCount);
-        for (int i = groupCount - 1; i >= 0; i--) { // Reverse the order for correct output
+        for (int i = groupCount - 1; i >= 0; i--) { // Print in reverse order for correct output
             System.out.print(group_first[i] + " ");
         }
     }
