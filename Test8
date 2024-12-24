@@ -111,3 +111,64 @@ public class Main {
         }
     }
 }
+
+
+
+import java.util.Scanner;
+
+public class Main {
+
+    static int N; // Number of players
+    static long T; // Time in minutes
+    static long[] P; // Player initial positions
+    static long[] S; // Player speeds
+    static int[] groupLeaders; // Array to store group leaders
+    static int groupCount; // Number of groups
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Input the number of players and time
+        N = sc.nextInt();
+        T = sc.nextLong();
+
+        P = new long[N];
+        S = new long[N];
+        groupLeaders = new int[N];
+
+        // Input the initial positions and speeds
+        for (int i = 0; i < N; i++) {
+            P[i] = sc.nextLong();
+            S[i] = sc.nextLong();
+        }
+
+        sc.close();
+
+        // Initialize the last player as the first group leader
+        groupLeaders[groupCount++] = N - 1;
+
+        // Traverse from second-to-last player to the first
+        for (int i = N - 2; i >= 0; i--) {
+            // Get the current leader of the last group
+            int leader = groupLeaders[groupCount - 1];
+
+            // Calculate the positions at time T
+            long currentPosition = P[i] + S[i] * T;
+            long leaderPosition = P[leader] + S[leader] * T;
+
+            // If the current player cannot catch up with the leader, form a new group
+            if (currentPosition < leaderPosition) {
+                groupLeaders[groupCount++] = i;
+            }
+        }
+
+        // Output the number of groups
+        System.out.println(groupCount);
+
+        // Output the indices of group leaders in the correct order
+        for (int i = groupCount - 1; i >= 0; i--) {
+            System.out.print((groupLeaders[i] + 1) + " ");
+        }
+    }
+}
+
