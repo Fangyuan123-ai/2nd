@@ -1,243 +1,67 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.math.BigInteger;
-import java.util.*;
-
-public class Main implements Runnable {
-    class Point implements Comparable<Point> {
-        int x, y;
-
-        public Point(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override
-        public int compareTo(Point o) {
-            if (x == o.x) {
-                return o.y - y;
-            } else return x - o.x;
-        }
-    }
-
-    void solve() throws IOException {
-        int n = nextInt();
-        int m = nextInt();
-        int k = nextInt();
-        HashMap<Integer, Vector<Point>> map = new HashMap<>();
-        for (int i = 0; i < k; i++) {
-            int r = nextInt();
-            int x = nextInt();
-            int y = nextInt();
-            Point p = new Point(x, y);
-            if (!map.containsKey(r)) {
-                map.put(r, new Vector<>());
-            }
-            map.get(r).add(p);
-        }
-        long res = 0;
-
-        res = (long) (n - map.size()) * m;
-
-        for (Map.Entry<Integer, Vector<Point>> en : map.entrySet()) {
-            Vector<Point> segments = new Vector<>();
-            //segments.add(new Point(0, -1));
-            segments.add(new Point(m + 1, 1));
-            for (Point p : en.getValue()) {
-                segments.add(new Point(p.x, 1));
-                segments.add(new Point(p.y, -1));
-            }
-            Collections.sort(segments);
-            int cnt = 0;
-            int lastZero = 0;
-            int add = 0;
-            for (Point p : segments) {
-                if (cnt == 0) {
-                    add += p.x - lastZero - 1;
+    static int [][] ends = new int[10][1005];
+    static int [] lens = new int[10];
+    public static String search (String acr) {
+        //System.err.printf("Acronym %s\n", acr);
+        int acrl = acr.length();
+        char prefix[] = new char[20];
+        int dp[] = new int[20];
+        String answer = "wtf";
+        double score = 0;
+        for (int i = 0; i < n; i ++) {
+            //System.err.printf("  searching %dth snippet with %d words\n", i, lens[i]);
+            for (int start = 0; start < lens[i]; start ++) {
+                if (Character.toUpperCase(text[i][start].charAt(0)) != acr.charAt(0)) {
+                    continue;
                 }
-                cnt += p.y;
-                if (cnt == 0) {
-                    lastZero = p.x;
+                System.err.printf("    starting %s\n", text[i][start]);
+                for (int add = 0; add <= 15; add ++) {
+                    dp[add] = 0;
+                }
+                int matching = 0;
+                for (int add = 0; add < Math.min(15, lens[i] - start); add ++) {
+                    char pref = prefix[add] = Character.toUpperCase(text[i][start + add].charAt(0));
+                    for (int j = acrl - 1; j >= 0; j --) {
+                        if (pref == acr.charAt(j)) {
+                            dp[j + 1] = Math.max(dp[j + 1], dp[j] + 1);
+                        } else {
+                            dp[j + 1] = Math.max(dp[j + 1], dp[j]);
+                        }
+                        matching = Math.max(matching, dp[j + 1]);
+
+                    }
+                    double newScore = matching * 1.0 / (Math.max(acrl, add + 1) + (add + 1) / 90.0);
+                    System.err.printf("      %d %f\n", matching, newScore);
+                    if (newScore > score && pref == acr.charAt(acrl - 1)) {
+                        //System.err.printf("FOUND\n");
+                        score = newScore;
+                        answer = lines[i].substring(starts[i][start], ends[i][start + add]);
+                        //System.err.println(answer);
+                    }
                 }
             }
-            res += add;
-            //out.println(en.getKey() + " " + add);
         }
-
-        out.print(res);
-
+        return answer;
     }
-
-    BufferedReader br;
-    StringTokenizer st;
-    PrintWriter out;
-
-    public void run() {
-        try {
-            br = new BufferedReader(new InputStreamReader(System.in));
-            out = new PrintWriter(System.out);
-
-            solve();
-            br.close();
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(123);
-        }
-    }
-
-    String next() throws IOException {
-        while (st == null || !st.hasMoreTokens()) {
-            String s = br.readLine();
-            if (s == null)
-                return null;
-            st = new StringTokenizer(s);
-        }
-        return st.nextToken();
-    }
-
-    double nextDouble() throws IOException {
-        return Double.parseDouble(next());
-    }
-
-    int nextInt() throws IOException {
-        return Integer.parseInt(next());
-    }
-
-    long nextLong() throws IOException {
-        return Long.parseLong(next());
-    }
-
-    public static void main(String[] args) {
-        new Thread(new Main()).start();
-    }
-}
-
-
-
-
-
-
-
-
-import java.util.*;
-
-class PasswordChecker {
-
-    private Set<String> passwordSet = null;
-    private Set<Integer> alreadyTested = null;
-
-    public PasswordChecker(Collection<String> passwordSet) {
-        this.passwordSet = new TreeSet<>(passwordSet);
-        this.alreadyTested = new HashSet<>();
-    }
-
-
-    /* Sanity checks */
-    private boolean containsBackstring(String password) {
-        for (String s: this.passwordSet) {
-            if (password.endsWith(s)) {
-                return true;
+    public static void main (String [] args) throws IOException {
+        init();
+        n = Integer.parseInt(cin.readLine());
+        for (int i = 0; i < n; i ++) {
+            String str = lines[i] = cin.readLine() + " ";
+            int prevChar = 0;
+            for (int j = 0; j < str.length(); j ++) {
+                if (!Character.isLetter(str.charAt(j)) && str.charAt(j) != '\'') {
+                    if (j > prevChar) {
+                        text[i][lens[i]] = str.substring(prevChar, j);
+                        starts[i][lens[i]] = prevChar;
+                        ends[i][lens[i] ++] = j;
+                    }
+                    prevChar = j + 1;
+                }
             }
         }
-        return false;
+        for (int i = 0; i < n; i ++) {
+            System.out.println(search(cin.readLine().toUpperCase()));
+        }
+        quit();
     }
-
-    private Set<Character> getAllCharactersFrom(String str) {
-        Set<Character> result = new HashSet<>();
-        for (char c: str.toCharArray()) {
-            result.add(c);
-        }
-        return result;
-    }
-
-    private boolean allLegalCharacters(String password) {
-        Set<Character> legalChars = getAllCharactersFrom(String.join("", this.passwordSet));
-
-        for (char c: password.toCharArray()) {
-            if (! legalChars.contains(c)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public List<String> is_valid_password(String password) {
-        /* Do some initial sanity checking to prevent pointless recursion :) */
-        if (containsBackstring(password) &&
-            allLegalCharacters(password)
-        ) {
-            return is_valid_password(password, 0);
-        } else {
-            return null;
-        }
-    }
-
-    private List<String> is_valid_password(String password, int index) {
-
-        if (index == password.length()) {
-            return new LinkedList<>();
-        }
-        if (index > password.length()) {
-            return null;
-        }
-        if (alreadyTested.contains(index)) {
-            return null;
-        }
-        alreadyTested.add(index);
-
-        List<String> candidatePasswords = new ArrayList<>();
-
-        for (String possibleMatch: this.passwordSet) {
-            if (! password.startsWith(possibleMatch, index)) {
-                continue;
-            }
-
-            final String candidate = possibleMatch;
-
-            List<String> recursiveResult = this.is_valid_password(password, index + candidate.length());
-            if (recursiveResult != null) {
-                recursiveResult.add(0, candidate);
-                return recursiveResult;
-            }
-        }
-
-        return null;
-    }
-
-}
-
-public class Main {
-
-    public static void main(String [] args) {
-
-        Scanner sc = new Scanner(System.in);
-
-        int numberTests = Integer.parseInt(sc.nextLine());
-
-        for (int i = 0; i < numberTests; i++) {
-
-            int numberWords = Integer.parseInt(sc.nextLine());
-            String [] words = sc.nextLine().split(" ");
-            Set<String> wordSet = new HashSet<>();
-            for (int j = 0; j < words.length; j++) {
-                wordSet.add(words[j]);
-            }
-
-            String testphrase = sc.nextLine().trim();
-            List<String> result = new PasswordChecker(wordSet).is_valid_password(testphrase);
-
-            if (result == null) {
-                System.out.println("WRONG PASSWORD");
-            } else {
-                System.out.println(String.join(" ", result));
-            }
-
-        }
-
-    }
-
 }
