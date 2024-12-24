@@ -1,98 +1,97 @@
-import java.util.Scanner;
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.StringTokenizer;
 
-public class MinFuelCalculator {
-    static final int MAX_N = 8;
-    static int N;
-    static Position[] base = new Position[2];
-    static Position[] pos = new Position[MAX_N];
-    static boolean[] visited = new boolean[MAX_N];
-    static int minFuel = Integer.MAX_VALUE;
+public class Main {
 
-    static class Position {
+    class POS {
         int x, y;
-        Position(int x, int y) {
+
+        POS(int x, int y) {
             this.x = x;
             this.y = y;
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            inputData();
-            solve();
-            System.out.println(minFuel);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
+    int N; // Number of parcels
+    POS[] base; // Base positions for the two trucks
+    POS[] pos; // Positions of the parcels
+    boolean[] visited;
+    int minFuel = Integer.MAX_VALUE;
 
-    static void inputData() throws Exception {
-        Scanner sc = new Scanner(System.in);
+    BufferedReader br;
+    BufferedWriter bw;
 
-        N = sc.nextInt();
-        if (N < 1 || N > MAX_N) throw new Exception("Invalid number of parcel points. Must be between 1 and " + MAX_N);
+    void inputData() throws Exception {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
+        StringTokenizer st;
+
+        // Read number of parcels
+        st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        if (N < 1 || N > 8) throw new Exception("Invalid number of parcels (1 <= N <= 8)");
+
+        base = new POS[2];
+        pos = new POS[N];
+        visited = new boolean[N];
+
+        // Read the positions of the two bases
         for (int i = 0; i < 2; i++) {
-            base[i] = new Position(sc.nextInt(), sc.nextInt());
+            st = new StringTokenizer(br.readLine());
+            int x = Integer.parseInt(st.nextToken());
+            int y = Integer.parseInt(st.nextToken());
+            base[i] = new POS(x, y);
         }
+
+        // Read the positions of the parcels
+        for (int i = 0; i < N; i++) {
+            st = new StringTokenizer(br.readLine());
+            int x = Integer.parseInt(st.nextToken());
+            int y = Integer.parseInt(st.nextToken());
+            pos[i] = new POS(x, y);
+        }
+    }
+
+    void solve() {
+        // Explore all possible combinations of parcel assignments
+        for (int mask = 0; mask < (1 << N); mask++) {
+            int truck1Fuel = calculateFuel(mask, 0); // Truck 1
+            int truck2Fuel = calculateFuel(~mask, 1); // Truck 2
+            minFuel = Math.min(minFuel, truck1Fuel + truck2Fuel);
+        }
+    }
+
+    int calculateFuel(int mask, int truckIdx) {
+        int fuel = 0;
+        int parcels = 0;
+        int currX = base[truckIdx].x;
+        int currY = base[truckIdx].y;
 
         for (int i = 0; i < N; i++) {
-            pos[i] = new Position(sc.nextInt(), sc.nextInt());
-        }
-
-        sc.close();
-    }
-
-    static void solve() {
-        int[] truck1Visited = new int[N];
-        int[] truck2Visited = new int[N];
-
-        for (int i = 0; i < (1 << N); i++) {
-            Arrays.fill(truck1Visited, 0);
-            Arrays.fill(truck2Visited, 0);
-
-            for (int j = 0; j < N; j++) {
-                if ((i & (1 << j)) != 0) {
-                    truck1Visited[j] = 1;
-                } else {
-                    truck2Visited[j] = 1;
-                }
-            }
-
-            int truck1Fuel = 0, truck2Fuel = 0;
-
-            dfs(0, base[0].x, base[0].y, 0, truck1Fuel, truck1Visited);
-            dfs(1, base[1].x, base[1].y, 0, truck2Fuel, truck2Visited);
-        }
-    }
-
-    static void dfs(int officeIdx, int currX, int currY, int parcels, int fuel, int[] truckVisited) {
-        if (fuel >= minFuel) return; // Prune paths with higher fuel
-
-        boolean finished = true;
-
-        for (int i = 0; i < N; i++) {
-            if (!visited[i] && truckVisited[i] == 1) {
-                visited[i] = true;
-                dfs(officeIdx, pos[i].x, pos[i].y, parcels + 1,
-                        fuel + calculateFuel(currX, currY, pos[i].x, pos[i].y, parcels),
-                        truckVisited);
-                visited[i] = false;
-                finished = false;
+            if ((mask & (1 << i)) != 0) {
+                int distance = Math.abs(currX - pos[i].x) + Math.abs(currY - pos[i].y);
+                fuel += distance * (1 + parcels);
+                currX = pos[i].x;
+                currY = pos[i].y;
+                parcels++;
             }
         }
 
-        if (finished) { // Return to the office
-            fuel += calculateFuel(currX, currY, base[officeIdx].x, base[officeIdx].y, parcels);
-            if (fuel < minFuel) {
-                minFuel = fuel;
-            }
-        }
+        // Return to the base
+        fuel += (Math.abs(currX - base[truckIdx].x) + Math.abs(currY - base[truckIdx].y)) * (1 + parcels);
+        return fuel;
     }
 
-    static int calculateFuel(int x1, int y1, int x2, int y2, int parcels) {
-        int distance = Math.abs(x1 - x2) + Math.abs(y1 - y2);
-        return distance * (1 + parcels);
+    public static void main(String[] args) throws Exception {
+        Main m = new Main();
+        m.inputData(); // Input
+        m.solve(); // Solve the problem
+        // Output the result
+        m.bw.write(m.minFuel + "\n");
+        m.bw.flush();
     }
 }
