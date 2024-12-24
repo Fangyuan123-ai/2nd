@@ -248,3 +248,21 @@ m.OutputData(ans);
 
 }
 Only modify CalLargestBlock
+
+
+int CalLargestBlock(int id_ignore) {
+    int max_block_size = 0; // Maximum block size found
+    int left = 0;          // Left pointer of the sliding window
+
+    for (int right = 0; right < N; right++) {
+        // If the product type is the one to ignore, move the left pointer
+        if (ID[right] == id_ignore) {
+            left = right + 1;
+        } else {
+            // Update the maximum block size
+            max_block_size = Math.max(max_block_size, right - left + 1);
+        }
+    }
+
+    return max_block_size;
+}
