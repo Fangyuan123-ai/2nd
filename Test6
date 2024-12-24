@@ -50,7 +50,6 @@ public class Main {
 
 
 import java.util.Scanner;
-import java.util.Stack;
 
 public class Main {
 
@@ -76,25 +75,18 @@ public class Main {
     int solve() {
         int count = 0;
 
-        // Monotonic stack to track valid travel ranges
-        Stack<Integer> stack = new Stack<>();
-
-        // Traverse through the planets
-        for (int i = 0; i < N; i++) {
-            // Remove planets from the stack if they violate the mass condition
-            while (!stack.isEmpty() && mass[stack.peek()] <= mass[i]) {
-                stack.pop();
-            }
-
-            // The number of valid pairs ending at planet `i` is the size of the stack
-            count += stack.size();
-
-            // Push the current planet onto the stack
-            stack.push(i);
-        }
-
         // Add neighboring pairs (always valid)
         count += N - 1;
+
+        // Sliding window (two-pointer approach)
+        for (int i = 0; i < N; i++) {
+            int minMass = mass[i]; // Current planet's mass
+            for (int j = i + 2; j < N; j++) {
+                // Check if all intermediate planets have less mass
+                if (mass[j] >= minMass) break;
+                count++;
+            }
+        }
 
         return count;
     }
