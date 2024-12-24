@@ -47,3 +47,55 @@ public class Main {
         return true;
     }
 }
+
+
+
+
+
+import java.util.Scanner;
+import java.util.Stack;
+
+public class Main {
+
+    int N; // Number of planets
+    int[] mass = new int[100000 + 10]; // Mass of planets
+
+    void InputData() {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt();
+        for (int i = 0; i < N; i++) {
+            mass[i] = sc.nextInt();
+        }
+        sc.close();
+    }
+
+    public static void main(String[] args) {
+        Main m = new Main();
+        m.InputData(); // Input
+        int ans = m.solve(); // Solve the problem
+        System.out.println(ans); // Output
+    }
+
+    int solve() {
+        Stack<Integer> stack = new Stack<>();
+        int count = 0;
+
+        for (int i = 0; i < N; i++) {
+            // Ensure the stack maintains a descending order of mass
+            while (!stack.isEmpty() && mass[stack.peek()] <= mass[i]) {
+                stack.pop();
+            }
+
+            // Count all valid pairs with the current planet
+            count += stack.size();
+
+            // Push the current planet onto the stack
+            stack.push(i);
+        }
+
+        // Add neighboring pairs (always valid)
+        count += N - 1;
+
+        return count;
+    }
+}
