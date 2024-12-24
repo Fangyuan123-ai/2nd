@@ -1,0 +1,57 @@
+import java.util.Scanner;
+
+public class Main {
+
+    char stime[] = new char[10];
+    char etime[] = new char[10];
+
+    // Input function
+    void InputData() {
+        Scanner sc = new Scanner(System.in);
+        stime = sc.next().toCharArray(); // Start time
+        etime = sc.next().toCharArray(); // End time
+        sc.close();
+    }
+
+    // Convert time from char array to integer
+    int ConvertInt(char a, char b) {
+        return (a - '0') * 10 + (b - '0');
+    }
+
+    // Compute the time difference in minutes
+    int ComputeTime() {
+        int startMinutes = ConvertInt(stime[0], stime[1]) * 60 + ConvertInt(stime[3], stime[4]);
+        int endMinutes = ConvertInt(etime[0], etime[1]) * 60 + ConvertInt(etime[3], etime[4]);
+        if (endMinutes < startMinutes) {
+            endMinutes += 24 * 60; // Handle end time being on the next day
+        }
+        return endMinutes - startMinutes;
+    }
+
+    // Calculate the usage fee
+    int Solve() {
+        int fee = 0;
+        int duration = ComputeTime(); // Time of use in minutes
+
+        if (duration <= 30) {
+            return 500; // Minimum fee for up to 30 minutes
+        }
+
+        fee = 500 + ((int) Math.ceil((duration - 30) / 10.0)) * 300; // Fee for additional time
+        return Math.min(fee, 30000); // Cap at 30,000 KRW
+    }
+
+    // Output the result
+    void OutputData(int sol) {
+        System.out.println(sol);
+    }
+
+    // Main function
+    public static void main(String[] args) {
+        int sol = -1;
+        Main m = new Main();
+        m.InputData(); // Input
+        sol = m.Solve(); // Solve
+        m.OutputData(sol); // Output
+    }
+}
