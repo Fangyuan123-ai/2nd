@@ -1,0 +1,60 @@
+import java.util.Scanner;
+
+public class Main {
+
+    int N; // Size of the grid
+    int[][] a = new int[10][10]; // The landscape grid
+    int X1, X2, X3; // The three numbers representing the hidden picture
+    int[] di = {0, 1, 1, 1, 0, -1, -1, -1}; // Row direction (up, down, diagonals)
+    int[] dj = {1, 1, 0, -1, -1, -1, 0, 1}; // Column direction (left, right, diagonals)
+
+    void InputData() {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt();
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                a[i][j] = sc.nextInt();
+            }
+        }
+        X1 = sc.nextInt();
+        X2 = sc.nextInt();
+        X3 = sc.nextInt();
+        sc.close();
+    }
+
+    int Solve() {
+        int count = 0;
+
+        // Traverse the grid
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                // Check if the current cell matches the first number
+                if (a[i][j] != X1) continue;
+
+                // Check all 8 directions
+                for (int k = 0; k < 8; k++) {
+                    int ni1 = i + di[k], nj1 = j + dj[k]; // Next position for X2
+                    int ni2 = ni1 + di[k], nj2 = nj1 + dj[k]; // Next position for X3
+
+                    // Ensure indices are within bounds
+                    if (ni1 < 0 || ni1 >= N || nj1 < 0 || nj1 >= N) continue;
+                    if (ni2 < 0 || ni2 >= N || nj2 < 0 || nj2 >= N) continue;
+
+                    // Check if the sequence matches X1 -> X2 -> X3
+                    if (a[ni1][nj1] == X2 && a[ni2][nj2] == X3) {
+                        count++;
+                    }
+                }
+            }
+        }
+
+        return count;
+    }
+
+    public static void main(String[] args) {
+        Main m = new Main();
+        m.InputData();
+        int ans = m.Solve(); // Find the hidden pictures
+        System.out.println(ans); // Print the result
+    }
+}
