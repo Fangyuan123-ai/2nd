@@ -16,46 +16,44 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        int ans = 0;
         Main m = new Main();
         m.InputData(); // Input
-
-        // Solution starts here
-        ans = m.solve();
-
+        int ans = m.solve(); // Solve the problem
         System.out.println(ans); // Output
     }
 
     int solve() {
-        int count = N - 1; // Neighboring planets always form valid pairs
+        // Step 1: Initialize count with the neighboring pairs
+        int count = N - 1;
+
+        // Step 2: Use a monotonic stack to process non-neighboring pairs
         Stack<Integer> stack = new Stack<>();
 
+        // Process planets in a forward direction
         for (int i = 0; i < N; i++) {
-            // Remove planets from the stack that are not valid as "smaller intermediate planets"
-            while (!stack.isEmpty() && mass[stack.peek()] < mass[i]) {
+            while (!stack.isEmpty() && mass[stack.peek()] <= mass[i]) {
                 stack.pop();
             }
-
-            // Add valid pairs for planets in the stack
-            for (int j = 0; j < stack.size(); j++) {
-                if (isValid(stack.get(j), i)) {
-                    count++;
-                }
+            if (!stack.isEmpty()) {
+                count++;
             }
-
-            // Push the current planet index to the stack
             stack.push(i);
         }
-        return count;
-    }
 
-    boolean isValid(int a, int b) {
-        // Check if all intermediate planets between `a` and `b` are smaller than `mass[a]` and `mass[b]`
-        for (int i = a + 1; i < b; i++) {
-            if (mass[i] >= mass[a] || mass[i] >= mass[b]) {
-                return false;
+        // Clear stack for backward processing
+        stack.clear();
+
+        // Process planets in a backward direction
+        for (int i = N - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && mass[stack.peek()] <= mass[i]) {
+                stack.pop();
             }
+            if (!stack.isEmpty()) {
+                count++;
+            }
+            stack.push(i);
         }
-        return true;
+
+        return count;
     }
 }
