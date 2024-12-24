@@ -1,0 +1,49 @@
+import java.util.Scanner;
+
+public class Main {
+    int N;
+    int[][] Box;
+
+    void InputData() {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt(); // Size of the box
+        Box = new int[N][N];
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                Box[i][j] = sc.nextInt();
+            }
+        }
+        sc.close();
+    }
+
+    public static void main(String[] args) {
+        Main m = new Main();
+        m.InputData();
+
+        // Step 1: Calculate row and column sums
+        int[] rowSums = new int[m.N];
+        int[] colSums = new int[m.N];
+        for (int i = 0; i < m.N; i++) {
+            for (int j = 0; j < m.N; j++) {
+                rowSums[i] += m.Box[i][j];
+                colSums[j] += m.Box[i][j];
+            }
+        }
+
+        // Step 2: Find the maximum sum among rows and columns
+        int maxSum = 0;
+        for (int i = 0; i < m.N; i++) {
+            maxSum = Math.max(maxSum, rowSums[i]);
+            maxSum = Math.max(maxSum, colSums[i]);
+        }
+
+        // Step 3: Calculate the total quantity of products to add
+        int totalProductsToAdd = 0;
+        for (int i = 0; i < m.N; i++) {
+            totalProductsToAdd += maxSum - rowSums[i];
+        }
+
+        // Output the result
+        System.out.println(totalProductsToAdd);
+    }
+}
