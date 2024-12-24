@@ -1,76 +1,98 @@
-#include <stdio.h>
-#include <math.h>
-#include <limits.h>
+import java.util.Scanner;
+import java.util.Arrays;
 
-#define MAX_N 8
+public class MinFuelCalculator {
+    static final int MAX_N = 8;
+    static int N;
+    static Position[] base = new Position[2];
+    static Position[] pos = new Position[MAX_N];
+    static boolean[] visited = new boolean[MAX_N];
+    static int minFuel = Integer.MAX_VALUE;
 
-typedef struct {
-    int x, y;
-} POS;
-
-int N;
-POS base[2];
-POS pos[MAX_N + 10];
-int visited[MAX_N];
-int minFuel = INT_MAX;
-
-int CalculateFuel(int x1, int y1, int x2, int y2, int parcels) {
-    int distance = abs(x1 - x2) + abs(y1 - y2);
-    return distance * (1 + parcels);
-}
-
-void DFS(int officeIdx, int currX, int currY, int parcels, int fuel, int truckVisited[MAX_N]) {
-    if (fuel >= minFuel) return; // Prune unnecessary calculations
-    int i, finished = 1;
-    for (i = 0; i < N; i++) {
-        if (!visited[i] && !truckVisited[i]) {
-            visited[i] = 1;
-            truckVisited[i] = 1;
-            DFS(officeIdx, pos[i].x, pos[i].y, parcels + 1, 
-                fuel + CalculateFuel(currX, currY, pos[i].x, pos[i].y, parcels), truckVisited);
-            visited[i] = 0;
-            truckVisited[i] = 0;
-            finished = 0;
+    static class Position {
+        int x, y;
+        Position(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
     }
-    if (finished) { // Return to the starting point
-        fuel += CalculateFuel(currX, currY, base[officeIdx].x, base[officeIdx].y, parcels);
-        if (fuel < minFuel) minFuel = fuel;
-    }
-}
 
-void Solve() {
-    int i;
-    int truck1Visited[MAX_N] = {0}, truck2Visited[MAX_N] = {0};
-
-    for (i = 0; i < (1 << N); i++) {
-        int j;
-        for (j = 0; j < N; j++) {
-            if (i & (1 << j)) truck1Visited[j] = 1;
-            else truck1Visited[j] = 0;
-            truck2Visited[j] = !truck1Visited[j];
+    public static void main(String[] args) {
+        try {
+            inputData();
+            solve();
+            System.out.println(minFuel);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
-        int truck1Fuel = 0, truck2Fuel = 0;
-
-        DFS(0, base[0].x, base[0].y, 0, truck1Fuel, truck1Visited);
-        DFS(1, base[1].x, base[1].y, 0, truck2Fuel, truck2Visited);
     }
-}
 
-void Input_Data(void) {
-    int i;
-    scanf("%d", &N);
-    for (i = 0; i < 2; i++) {
-        scanf("%d %d", &base[i].x, &base[i].y);
-    }
-    for (i = 0; i < N; i++) {
-        scanf("%d %d", &pos[i].x, &pos[i].y);
-    }
-}
+    static void inputData() throws Exception {
+        Scanner sc = new Scanner(System.in);
 
-int main(void) {
-    Input_Data();
-    Solve();
-    printf("%d\n", minFuel);
-    return 0;
+        N = sc.nextInt();
+        if (N < 1 || N > MAX_N) throw new Exception("Invalid number of parcel points. Must be between 1 and " + MAX_N);
+
+        for (int i = 0; i < 2; i++) {
+            base[i] = new Position(sc.nextInt(), sc.nextInt());
+        }
+
+        for (int i = 0; i < N; i++) {
+            pos[i] = new Position(sc.nextInt(), sc.nextInt());
+        }
+
+        sc.close();
+    }
+
+    static void solve() {
+        int[] truck1Visited = new int[N];
+        int[] truck2Visited = new int[N];
+
+        for (int i = 0; i < (1 << N); i++) {
+            Arrays.fill(truck1Visited, 0);
+            Arrays.fill(truck2Visited, 0);
+
+            for (int j = 0; j < N; j++) {
+                if ((i & (1 << j)) != 0) {
+                    truck1Visited[j] = 1;
+                } else {
+                    truck2Visited[j] = 1;
+                }
+            }
+
+            int truck1Fuel = 0, truck2Fuel = 0;
+
+            dfs(0, base[0].x, base[0].y, 0, truck1Fuel, truck1Visited);
+            dfs(1, base[1].x, base[1].y, 0, truck2Fuel, truck2Visited);
+        }
+    }
+
+    static void dfs(int officeIdx, int currX, int currY, int parcels, int fuel, int[] truckVisited) {
+        if (fuel >= minFuel) return; // Prune paths with higher fuel
+
+        boolean finished = true;
+
+        for (int i = 0; i < N; i++) {
+            if (!visited[i] && truckVisited[i] == 1) {
+                visited[i] = true;
+                dfs(officeIdx, pos[i].x, pos[i].y, parcels + 1,
+                        fuel + calculateFuel(currX, currY, pos[i].x, pos[i].y, parcels),
+                        truckVisited);
+                visited[i] = false;
+                finished = false;
+            }
+        }
+
+        if (finished) { // Return to the office
+            fuel += calculateFuel(currX, currY, base[officeIdx].x, base[officeIdx].y, parcels);
+            if (fuel < minFuel) {
+                minFuel = fuel;
+            }
+        }
+    }
+
+    static int calculateFuel(int x1, int y1, int x2, int y2, int parcels) {
+        int distance = Math.abs(x1 - x2) + Math.abs(y1 - y2);
+        return distance * (1 + parcels);
+    }
 }
