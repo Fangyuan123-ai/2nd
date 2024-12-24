@@ -49,11 +49,7 @@ public class Main {
 }
 
 
-
-
-
 import java.util.Scanner;
-import java.util.Stack;
 
 public class Main {
 
@@ -77,20 +73,17 @@ public class Main {
     }
 
     int solve() {
-        Stack<Integer> stack = new Stack<>();
-        int count = 0;
+        int count = 0; // Total number of valid pairs
 
+        // Iterate over each planet as the starting point (left pointer)
         for (int i = 0; i < N; i++) {
-            // Ensure the stack maintains a descending order of mass
-            while (!stack.isEmpty() && mass[stack.peek()] <= mass[i]) {
-                stack.pop();
+            int minMass = mass[i]; // Minimum mass between two endpoints
+            for (int j = i + 1; j < N; j++) {
+                // Check if the current planet satisfies the condition
+                if (mass[j] >= minMass) break;
+                count++;
+                minMass = Math.min(minMass, mass[j]); // Update the minimum mass
             }
-
-            // Count all valid pairs with the current planet
-            count += stack.size();
-
-            // Push the current planet onto the stack
-            stack.push(i);
         }
 
         // Add neighboring pairs (always valid)
