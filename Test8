@@ -1,0 +1,47 @@
+import java.util.Scanner;
+
+public class Main {
+
+    static int N; // Number of players
+    static long T; // Time in minutes
+    static long[] P = new long[100000 + 10]; // Player initial positions
+    static long[] S = new long[100000 + 10]; // Player speeds
+    static int[] group_first = new int[100000 + 10]; // Leaders of each group
+
+    public void InputData() {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt();
+        T = sc.nextLong();
+        for (int i = 0; i < N; i++) {
+            P[i] = sc.nextLong();
+            S[i] = sc.nextLong();
+        }
+        sc.close();
+    }
+
+    public static void main(String[] args) {
+        Main m = new Main();
+        m.InputData(); // Input
+
+        int groupCount = 0; // Number of groups
+        group_first[groupCount++] = N; // Assume last player is initially a group leader
+
+        // Traverse from the second-to-last player to the first
+        for (int i = N - 2; i >= 0; i--) {
+            // Calculate the positions of the current player and the next player at time T
+            long currentPosition = P[i] + S[i] * T;
+            long nextPosition = P[i + 1] + S[i + 1] * T;
+
+            // If the current player can't catch up to the next player, they form a new group
+            if (currentPosition < nextPosition) {
+                group_first[groupCount++] = i + 1;
+            }
+        }
+
+        // Output the results
+        System.out.println(groupCount);
+        for (int i = groupCount - 1; i >= 0; i--) {
+            System.out.print(group_first[i] + " ");
+        }
+    }
+}
