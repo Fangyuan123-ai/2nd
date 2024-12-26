@@ -1,0 +1,91 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    int S, E1, E2;
+    int ans1, ans2;
+
+    // Method to read input
+    void InputData() throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        String in[] = bf.readLine().split(" ");
+        S = Integer.parseInt(in[0]);
+        E1 = Integer.parseInt(in[1]);
+        E2 = Integer.parseInt(in[2]);
+        bf.close();
+    }
+
+    // Method to output results
+    void OutputData() throws IOException {
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        bw.write(String.valueOf(ans1) + "\n");
+        bw.write(String.valueOf(ans2) + "\n");
+        bw.flush();
+        bw.close();
+    }
+
+    // Helper method to calculate the number of factors of a number
+    int getFactorsCount(int n) {
+        int count = 0;
+        for (int i = 1; i * i <= n; i++) {
+            if (n % i == 0) {
+                count++;
+                if (i != n / i) count++;
+            }
+        }
+        return count;
+    }
+
+    // Helper method to check if two planets can connect
+    boolean canConnect(int a, int b) {
+        String strA = String.valueOf(a);
+        String strB = String.valueOf(b);
+
+        // Check if only one digit is different
+        int diffCount = 0;
+        for (int i = 0; i < 4; i++) {
+            if (strA.charAt(i) != strB.charAt(i)) {
+                diffCount++;
+                if (diffCount > 1) return false;
+            }
+        }
+
+        // Check the difference in factors count
+        int factorDiff = Math.abs(getFactorsCount(a) - getFactorsCount(b));
+        return diffCount == 1 && factorDiff <= 1;
+    }
+
+    // Breadth-first search to find minimum moves
+    int bfs(int start, int target) {
+        Queue<Integer> queue = new LinkedList<>();
+        Map<Integer, Integer> distance = new HashMap<>();
+        queue.add(start);
+        distance.put(start, 0);
+
+        while (!queue.isEmpty()) {
+            int current = queue.poll();
+            int currentDist = distance.get(current);
+
+            if (current == target) return currentDist;
+
+            for (int i = 1000; i <= 9999; i++) {
+                if (!distance.containsKey(i) && canConnect(current, i)) {
+                    queue.add(i);
+                    distance.put(i, currentDist + 1);
+                }
+            }
+        }
+        return -1; // Should not happen as per problem constraints
+    }
+
+    public static void main(String[] args) throws IOException {
+        Main m = new Main();
+        m.InputData(); // Input function
+
+        // Calculate minimum moves for both destinations
+        m.ans1 = m.bfs(m.S, m.E1);
+        m.ans2 = m.bfs(m.S, m.E2);
+
+        m.OutputData(); // Output function
+    }
+}
