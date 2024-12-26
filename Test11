@@ -4,6 +4,14 @@ import java.util.*;
 public class Main {
     int S, E1, E2;
     int ans1, ans2;
+    Map<Integer, Integer> factorsMap = new HashMap<>();
+
+    // Precompute factors count for all 4-digit numbers
+    void precomputeFactors() {
+        for (int i = 1000; i <= 9999; i++) {
+            factorsMap.put(i, getFactorsCount(i));
+        }
+    }
 
     // Method to read input
     void InputData() throws IOException {
@@ -51,29 +59,55 @@ public class Main {
         }
 
         // Check the difference in factors count
-        int factorDiff = Math.abs(getFactorsCount(a) - getFactorsCount(b));
+        int factorDiff = Math.abs(factorsMap.get(a) - factorsMap.get(b));
         return diffCount == 1 && factorDiff <= 1;
+    }
+
+    // Generate neighbors by changing one digit at a time
+    List<Integer> generateNeighbors(int num) {
+        List<Integer> neighbors = new ArrayList<>();
+        char[] digits = String.valueOf(num).toCharArray();
+
+        for (int i = 0; i < 4; i++) {
+            char original = digits[i];
+            for (char ch = '0'; ch <= '9'; ch++) {
+                if (ch != original) {
+                    digits[i] = ch;
+                    int neighbor = Integer.parseInt(new String(digits));
+                    if (neighbor >= 1000 && neighbor <= 9999 && canConnect(num, neighbor)) {
+                        neighbors.add(neighbor);
+                    }
+                }
+            }
+            digits[i] = original;
+        }
+        return neighbors;
     }
 
     // Breadth-first search to find minimum moves
     int bfs(int start, int target) {
         Queue<Integer> queue = new LinkedList<>();
-        Map<Integer, Integer> distance = new HashMap<>();
+        Set<Integer> visited = new HashSet<>();
         queue.add(start);
-        distance.put(start, 0);
+        visited.add(start);
+
+        int moves = 0;
 
         while (!queue.isEmpty()) {
-            int current = queue.poll();
-            int currentDist = distance.get(current);
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                int current = queue.poll();
 
-            if (current == target) return currentDist;
+                if (current == target) return moves;
 
-            for (int i = 1000; i <= 9999; i++) {
-                if (!distance.containsKey(i) && canConnect(current, i)) {
-                    queue.add(i);
-                    distance.put(i, currentDist + 1);
+                for (int neighbor : generateNeighbors(current)) {
+                    if (!visited.contains(neighbor)) {
+                        visited.add(neighbor);
+                        queue.add(neighbor);
+                    }
                 }
             }
+            moves++;
         }
         return -1; // Should not happen as per problem constraints
     }
@@ -81,6 +115,9 @@ public class Main {
     public static void main(String[] args) throws IOException {
         Main m = new Main();
         m.InputData(); // Input function
+
+        // Precompute factors for all 4-digit numbers
+        m.precomputeFactors();
 
         // Calculate minimum moves for both destinations
         m.ans1 = m.bfs(m.S, m.E1);
