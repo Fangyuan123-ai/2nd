@@ -1,0 +1,56 @@
+import java.util.*;
+
+public class Main {
+
+    int N, K;
+    int[] X;
+
+    void InputData() {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt(); // Number of foreign matters
+        K = sc.nextInt(); // Maximum equipment usage
+        X = new int[N]; // Positions of foreign matters
+        for (int i = 0; i < N; i++) {
+            X[i] = sc.nextInt();
+        }
+        sc.close();
+    }
+
+    boolean canRemoveAll(int V) {
+        int count = 0; // Number of times equipment is used
+        int lastPosition = -1; // Last position covered by the equipment
+
+        for (int i = 0; i < N; i++) {
+            if (X[i] > lastPosition) { // If current position is not covered
+                count++;
+                lastPosition = X[i] + 2 * V; // Update the range covered by the equipment
+                if (count > K) return false; // Exceeded maximum usage
+            }
+        }
+        return true; // All foreign matter removed within K uses
+    }
+
+    int solve() {
+        Arrays.sort(X); // Sort positions
+        int left = 0, right = 1_000_000_000; // Binary search range for V
+        int ans = -1;
+
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (canRemoveAll(mid)) {
+                ans = mid;
+                right = mid - 1; // Try smaller V
+            } else {
+                left = mid + 1; // Increase V
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Main main = new Main();
+        main.InputData();
+        int ans = main.solve();
+        System.out.println(ans);
+    }
+}
