@@ -1,0 +1,79 @@
+import java.util.Scanner;
+
+public class Main {
+    int N;
+    String Info;
+    int[][] grid;
+    static final int SIZE = 102;
+    
+    void InputData() {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt();
+        Info = sc.next();
+        sc.close();
+    }
+    
+    int solve() {
+        grid = new int[SIZE][SIZE];
+        int x = 50, y = 50;
+        int minX = x, maxX = x;
+        int minY = y, maxY = y;
+        
+        // Mark visited positions and track the path
+        grid[y][x] = 1;
+        for (char c : Info.toCharArray()) {
+            int nx = x, ny = y;
+            switch(c) {
+                case '0': nx++; break; // East
+                case '1': nx--; break; // West
+                case '2': ny++; break; // South
+                case '3': ny--; break; // North
+            }
+            
+            // Mark the line segment
+            grid[ny][nx] = 1;
+            
+            // Update boundaries
+            minX = Math.min(minX, nx);
+            maxX = Math.max(maxX, nx);
+            minY = Math.min(minY, ny);
+            maxY = Math.max(maxY, ny);
+            
+            x = nx;
+            y = ny;
+        }
+        
+        // Count enclosed areas
+        int areas = 0;
+        for(int i = minY; i <= maxY; i++) {
+            for(int j = minX; j <= maxX; j++) {
+                if(grid[i][j] == 0) { // Empty cell
+                    boolean isInside = false;
+                    int crosses = 0;
+                    
+                    // Count vertical line crossings to the left
+                    for(int k = j - 1; k >= minX; k--) {
+                        if(grid[i][k] == 1 && 
+                           (grid[i-1][k] == 1 || grid[i+1][k] == 1)) {
+                            crosses++;
+                        }
+                    }
+                    
+                    if(crosses % 2 == 1) {
+                        areas++;
+                        grid[i][j] = 2; // Mark as counted
+                    }
+                }
+            }
+        }
+        
+        return areas;
+    }
+    
+    public static void main(String[] args) {
+        Main m = new Main();
+        m.InputData();
+        int sol = m.solve();
+        System.out.print(sol);
+    }
+}
