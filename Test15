@@ -1,0 +1,68 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    int N, M;
+    int[] ID;
+
+    void InputData() throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        String[] in = bf.readLine().split(" ");
+        N = Integer.parseInt(in[0]);
+        M = Integer.parseInt(in[1]);
+        
+        ID = new int[N];
+        in = bf.readLine().split(" ");
+        for (int i = 0; i < N; i++) {
+            ID[i] = Integer.parseInt(in[i]);
+        }
+        bf.close();
+    }
+
+    void OutputData(int ans) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        bw.write(String.valueOf(ans) + "\n");
+        bw.flush();
+        bw.close();
+    }
+
+    int solve() {
+        int maxCount = 0;
+        int[] freq = new int[16];
+        
+        // Initialize first window
+        for (int i = 0; i < M; i++) {
+            freq[ID[i]]++;
+        }
+        
+        // Check first window
+        maxCount = getMaxSimilar(freq);
+        
+        // Slide window
+        for (int i = M; i < N; i++) {
+            freq[ID[i-M]]--; // Remove leftmost element
+            freq[ID[i]]++;   // Add rightmost element
+            maxCount = Math.max(maxCount, getMaxSimilar(freq));
+        }
+        
+        return maxCount;
+    }
+    
+    private int getMaxSimilar(int[] freq) {
+        int maxSim = 0;
+        for (int i = 0; i < 16; i++) {
+            int count = freq[i];
+            if (i > 0) count += freq[i-1];
+            if (i < 15) count += freq[i+1];
+            maxSim = Math.max(maxSim, count);
+        }
+        return maxSim;
+    }
+
+    public static void main(String[] args) throws IOException {
+        Main m = new Main();
+        m.InputData();
+        int ans = m.solve();
+        m.OutputData(ans);
+    }
+}
