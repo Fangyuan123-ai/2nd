@@ -90,3 +90,46 @@ public class Main {
     }
 }
 
+import java.util.Scanner;
+
+public class Main {
+    int N; // Number of planets
+    int[] mass; // Mass of planets
+
+    void InputData() {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt();
+        mass = new int[N];
+        for (int i = 0; i < N; i++) {
+            mass[i] = sc.nextInt();
+        }
+        sc.close();
+    }
+
+    public static void main(String[] args) {
+        Main m = new Main();
+        m.InputData(); // Input
+        int ans = m.solve(); // Solve the problem
+        System.out.println(ans); // Output
+    }
+
+    int solve() {
+        int count = N - 1; // Count neighboring pairs (always valid)
+
+        for (int A = 0; A < N; A++) {
+            int maxInWindow = 0; // Reset max for each A
+
+            for (int B = A + 2; B < N; B++) {
+                maxInWindow = Math.max(maxInWindow, mass[B - 1]); // Update max in the sliding window
+
+                if (maxInWindow < Math.min(mass[A], mass[B])) {
+                    count++; // Valid pair
+                }
+
+                // No need to break; continue checking further windows
+            }
+        }
+
+        return count;
+    }
+}
