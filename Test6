@@ -52,13 +52,13 @@ public class Main {
 import java.util.Scanner;
 
 public class Main {
-
     int N; // Number of planets
-    int[] mass = new int[100000 + 10]; // Mass of planets
+    int[] mass; // Mass of planets
 
     void InputData() {
         Scanner sc = new Scanner(System.in);
         N = sc.nextInt();
+        mass = new int[N];
         for (int i = 0; i < N; i++) {
             mass[i] = sc.nextInt();
         }
@@ -73,21 +73,20 @@ public class Main {
     }
 
     int solve() {
-        int count = 0;
+        int count = N - 1; // Count neighboring pairs (always valid)
 
-        // Add neighboring pairs (always valid)
-        count += N - 1;
-
-        // Sliding window (two-pointer approach)
-        for (int i = 0; i < N; i++) {
-            int minMass = mass[i]; // Current planet's mass
-            for (int j = i + 2; j < N; j++) {
-                // Check if all intermediate planets have less mass
-                if (mass[j] >= minMass) break;
-                count++;
+        for (int A = 0; A < N; A++) {
+            int maxInWindow = 0; // Reset max for each A
+            for (int B = A + 2; B < N; B++) {
+                maxInWindow = Math.max(maxInWindow, mass[B - 1]); // Update max in the sliding window
+                if (maxInWindow < Math.min(mass[A], mass[B])) {
+                    count++; // Valid pair
+                } 
+                // Do NOT break; continue exploring further windows
             }
         }
 
         return count;
     }
 }
+
