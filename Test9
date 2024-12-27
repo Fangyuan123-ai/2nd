@@ -2,96 +2,143 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 public class Main {
-
-    class POS {
+    static class POS {
         int x, y;
-
         POS(int x, int y) {
             this.x = x;
             this.y = y;
         }
     }
 
-    int N; // Number of parcels
-    POS[] base; // Base positions for the two trucks
-    POS[] pos; // Positions of the parcels
-    boolean[] visited;
-    int minFuel = Integer.MAX_VALUE;
-
+    InputStreamReader reader;
     BufferedReader br;
     BufferedWriter bw;
-
+    int N;
+    POS base[];
+    POS pos[];
+    int minTotalFuel;
+    boolean[] globalUsed;
+    
     void inputData() throws Exception {
-        br = new BufferedReader(new InputStreamReader(System.in));
+        reader = new InputStreamReader(System.in);
+        br = new BufferedReader(reader);
         bw = new BufferedWriter(new OutputStreamWriter(System.out));
-
+        
         StringTokenizer st;
-
-        // Read number of parcels
         st = new StringTokenizer(br.readLine());
         N = Integer.parseInt(st.nextToken());
-        if (N < 1 || N > 8) throw new Exception("Invalid number of parcels (1 <= N <= 8)");
-
+        
         base = new POS[2];
         pos = new POS[N];
-        visited = new boolean[N];
-
-        // Read the positions of the two bases
+        globalUsed = new boolean[N];
+        
         for (int i = 0; i < 2; i++) {
+            int x, y;
             st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken());
-            int y = Integer.parseInt(st.nextToken());
+            x = Integer.parseInt(st.nextToken());
+            y = Integer.parseInt(st.nextToken());
             base[i] = new POS(x, y);
         }
-
-        // Read the positions of the parcels
+        
         for (int i = 0; i < N; i++) {
+            int x, y;
             st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken());
-            int y = Integer.parseInt(st.nextToken());
+            x = Integer.parseInt(st.nextToken());
+            y = Integer.parseInt(st.nextToken());
             pos[i] = new POS(x, y);
         }
     }
 
-    void solve() {
-        // Explore all possible combinations of parcel assignments
-        for (int mask = 0; mask < (1 << N); mask++) {
-            int truck1Fuel = calculateFuel(mask, 0); // Truck 1
-            int truck2Fuel = calculateFuel(~mask, 1); // Truck 2
-            minFuel = Math.min(minFuel, truck1Fuel + truck2Fuel);
+    // Calculate Manhattan distance between two points
+    private int getDistance(POS p1, POS p2) {
+        return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+    }
+
+    // Calculate fuel needed for a specific route
+    private int calculateRouteFuel(ArrayList<Integer> route, POS startBase) {
+        if (route.isEmpty()) return 0;
+        
+        int fuel = 0;
+        POS currentPos = startBase;
+        int parcels = 0;
+        
+        // Calculate fuel for route to each point
+        for (int pointIndex : route) {
+            int distance = getDistance(currentPos, pos[pointIndex]);
+            fuel += distance * (1 + parcels);
+            currentPos = pos[pointIndex];
+            parcels++;
+        }
+        
+        // Add return trip to base
+        fuel += getDistance(currentPos, startBase) * (1 + parcels);
+        
+        return fuel;
+    }
+
+    // Try all possible permutations for remaining points for truck 2
+    private void tryRemainingPoints(ArrayList<Integer> route1, ArrayList<Integer> route2) {
+        boolean allUsed = true;
+        for (boolean used : globalUsed) {
+            if (!used) {
+                allUsed = false;
+                break;
+            }
+        }
+        
+        if (allUsed) {
+            int fuel1 = calculateRouteFuel(route1, base[0]);
+            int fuel2 = calculateRouteFuel(route2, base[1]);
+            minTotalFuel = Math.min(minTotalFuel, fuel1 + fuel2);
+            return;
+        }
+        
+        // Try adding unused points to route2
+        for (int i = 0; i < N; i++) {
+            if (!globalUsed[i]) {
+                globalUsed[i] = true;
+                route2.add(i);
+                tryRemainingPoints(route1, route2);
+                route2.remove(route2.size() - 1);
+                globalUsed[i] = false;
+            }
         }
     }
 
-    int calculateFuel(int mask, int truckIdx) {
-        int fuel = 0;
-        int parcels = 0;
-        int currX = base[truckIdx].x;
-        int currY = base[truckIdx].y;
-
+    // Generate all possible permutations for truck 1 and remaining for truck 2
+    private void generatePermutations(ArrayList<Integer> route1, ArrayList<Integer> route2, int depth) {
+        // Try assigning remaining points to truck 2
+        tryRemainingPoints(route1, route2);
+        
+        // Try more points for truck 1
         for (int i = 0; i < N; i++) {
-            if ((mask & (1 << i)) != 0) {
-                int distance = Math.abs(currX - pos[i].x) + Math.abs(currY - pos[i].y);
-                fuel += distance * (1 + parcels);
-                currX = pos[i].x;
-                currY = pos[i].y;
-                parcels++;
+            if (!globalUsed[i]) {
+                globalUsed[i] = true;
+                route1.add(i);
+                generatePermutations(route1, route2, depth + 1);
+                route1.remove(route1.size() - 1);
+                globalUsed[i] = false;
             }
         }
+    }
 
-        // Return to the base
-        fuel += (Math.abs(currX - base[truckIdx].x) + Math.abs(currY - base[truckIdx].y)) * (1 + parcels);
-        return fuel;
+    private int solve() {
+        minTotalFuel = Integer.MAX_VALUE;
+        generatePermutations(new ArrayList<>(), new ArrayList<>(), 0);
+        return minTotalFuel;
     }
 
     public static void main(String[] args) throws Exception {
         Main m = new Main();
-        m.inputData(); // Input
-        m.solve(); // Solve the problem
-        // Output the result
-        m.bw.write(m.minFuel + "\n");
+        m.inputData();
+        
+        int ans = m.solve();
+        
+        m.bw.write(ans + "\n");
         m.bw.flush();
     }
 }
