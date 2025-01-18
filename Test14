@@ -1,79 +1,117 @@
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
-    int N;
-    String Info;
-    int[][] grid;
-    static final int SIZE = 102;
-    
+
+    int N; // Number of movements
+    String Info; // Direction information
+    Set<String> edges; // To store the edges of the path
+    Set<String> visitedNodes; // To store visited nodes
+
+    // Input method
     void InputData() {
         Scanner sc = new Scanner(System.in);
         N = sc.nextInt();
         Info = sc.next();
         sc.close();
     }
-    
-    int solve() {
-        grid = new int[SIZE][SIZE];
-        int x = 50, y = 50;
-        int minX = x, maxX = x;
-        int minY = y, maxY = y;
-        
-        // Mark visited positions and track the path
-        grid[y][x] = 1;
+
+    // Method to count the areas formed by the LineBot's movement
+    int calculateAreas() {
+        edges = new HashSet<>();
+        visitedNodes = new HashSet<>();
+
+        // Start position
+        int x = 0, y = 0;
+        visitedNodes.add(encode(x, y));
+
+        // Directions: 0 = East, 1 = West, 2 = South, 3 = North
+        int[] dx = {1, -1, 0, 0};
+        int[] dy = {0, 0, 1, -1};
+
         for (char c : Info.toCharArray()) {
-            int nx = x, ny = y;
-            switch(c) {
-                case '0': nx++; break; // East
-                case '1': nx--; break; // West
-                case '2': ny++; break; // South
-                case '3': ny--; break; // North
-            }
-            
-            // Mark the line segment
-            grid[ny][nx] = 1;
-            
-            // Update boundaries
-            minX = Math.min(minX, nx);
-            maxX = Math.max(maxX, nx);
-            minY = Math.min(minY, ny);
-            maxY = Math.max(maxY, ny);
-            
+            int direction = c - '0';
+            int nx = x + dx[direction];
+            int ny = y + dy[direction];
+
+            // Add edge in both directions to track undirected edges
+            edges.add(encodeEdge(x, y, nx, ny));
+            edges.add(encodeEdge(nx, ny, x, y));
+
+            visitedNodes.add(encode(nx, ny));
+
+            // Move to the next position
             x = nx;
             y = ny;
         }
-        
-        // Count enclosed areas
-        int areas = 0;
-        for(int i = minY; i <= maxY; i++) {
-            for(int j = minX; j <= maxX; j++) {
-                if(grid[i][j] == 0) { // Empty cell
-                    boolean isInside = false;
-                    int crosses = 0;
-                    
-                    // Count vertical line crossings to the left
-                    for(int k = j - 1; k >= minX; k--) {
-                        if(grid[i][k] == 1 && 
-                           (grid[i-1][k] == 1 || grid[i+1][k] == 1)) {
-                            crosses++;
-                        }
-                    }
-                    
-                    if(crosses % 2 == 1) {
-                        areas++;
-                        grid[i][j] = 2; // Mark as counted
-                    }
+
+        // Use flood-fill to count enclosed areas
+        int areaCount = 0;
+        Set<String> visited = new HashSet<>();
+
+        for (String node : visitedNodes) {
+            if (!visited.contains(node)) {
+                if (floodFill(node, visited)) {
+                    areaCount++;
                 }
             }
         }
-        
-        return areas;
+
+        return areaCount;
     }
-    
+
+    // Encode a node (x, y) as a string
+    private String encode(int x, int y) {
+        return x + "," + y;
+    }
+
+    // Encode an edge between (x1, y1) and (x2, y2) as a string
+    private String encodeEdge(int x1, int y1, int x2, int y2) {
+        return x1 + "," + y1 + "-" + x2 + "," + y2;
+    }
+
+    // Flood-fill to check if the area is enclosed
+    private boolean floodFill(String start, Set<String> visited) {
+        Queue<String> queue = new LinkedList<>();
+        queue.add(start);
+        visited.add(start);
+
+        boolean isEnclosed = true;
+
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            String[] parts = current.split(",");
+            int x = Integer.parseInt(parts[0]);
+            int y = Integer.parseInt(parts[1]);
+
+            // Check neighbors
+            for (int i = 0; i < 4; i++) {
+                int nx = x + (i == 0 ? 1 : i == 1 ? -1 : 0);
+                int ny = y + (i == 2 ? 1 : i == 3 ? -1 : 0);
+
+                String neighbor = encode(nx, ny);
+                String edge = encodeEdge(x, y, nx, ny);
+
+                // If the edge is not part of the drawn path, it's open
+                if (!edges.contains(edge)) {
+                    isEnclosed = false;
+                } else if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        return isEnclosed;
+    }
+
     public static void main(String[] args) {
+        int sol = -1;
+
         Main m = new Main();
-        m.InputData();
-        int sol = m.solve();
-        System.out.print(sol);
+        m.InputData(); // Input
+
+        sol = m.calculateAreas(); // Calculate areas
+
+        System.out.print(sol); // Output result
     }
 }
