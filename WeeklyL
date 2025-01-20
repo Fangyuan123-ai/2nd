@@ -1,0 +1,318 @@
+1st
+
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int num = in.nextInt();
+        int queries = in.nextInt();
+        int[] arr = new int[num];
+        
+        for (int i = 0; i < num; i++) arr[i] = in.nextInt();
+        
+        while (queries-- != 0) {
+            int window = in.nextInt();
+            Queue<Integer> queue = new LinkedList<>();
+            Deque<Integer> deque = new ArrayDeque<>();
+            
+            for (int i = 0; i < window - 1; i++) addToQueue(queue, deque, arr[i]);
+            
+            int min = Integer.MAX_VALUE;
+            for (int i = window - 1; i < num; i++) {
+                addToQueue(queue, deque, arr[i]);
+                int max = deque.peek();
+                min = min < max ? min : max;
+                removeFromQueue(queue, deque);
+            }
+            System.out.println(min);
+        }   
+    }
+    
+    private static void addToQueue(Queue<Integer> queue, Deque<Integer> deque, int num) {
+        queue.add(num);
+        while (!deque.isEmpty() && deque.getLast() < num) {
+            deque.removeLast();
+        }
+        deque.addLast(num);
+    }
+    private static void removeFromQueue(Queue<Integer> queue, Deque<Integer> deque) {
+        int num = queue.remove();
+        if (deque.getFirst() == num) deque.removeFirst();
+    }
+}
+
+2nd
+// Complete the hasCycle function below.
+
+    /*
+     * For your reference:
+     *
+     * SinglyLinkedListNode {
+     *     int data;
+     *     SinglyLinkedListNode next;
+     * }
+     *
+     */
+    static boolean hasCycle(SinglyLinkedListNode head) {
+        Set<SinglyLinkedListNode> s = new HashSet<>();
+        SinglyLinkedListNode curr = head;
+        while(curr != null) {
+            if(s.contains(curr)) {
+                return true;
+            } else {
+                s.add(curr);
+            }
+            curr = curr.next;
+        }
+        return false;
+
+    }
+
+3rd
+
+import java.util.Scanner;
+
+public class BalancedParentheses {
+
+ public static void main(String[] args) {
+  Scanner sc = new Scanner(System.in);
+  int n = sc.nextInt();
+  CharacterStack stack = new CharacterStack();
+  boolean[] status = new boolean[n];
+  String[] _data = new String[n];
+  
+  for (int i = 0; i < n; i++) {
+   _data[i] = sc.next();
+  }
+  sc.close();
+  
+  for (int i = 0; i < n; i++) {
+   String data = _data[i];
+   inner: for (int j = 0; j < data.length(); j++) {
+    char input = data.charAt(j);
+    if (input == '[' || input == '{' || input == '(') {
+     stack.push(input);
+    } else if (input == ']' || input == '}' || input == ')') {
+     if (stack.peek() == null) {
+      status[i] = true;
+      break inner;
+     } else {
+      char top = stack.peek();
+      if ((top == '(' && input == ')')
+        || (top == '{' && input == '}')
+        || (top == '[' && input == ']')) {
+       stack.pop();
+      } else {
+       status[i] = true;
+       break inner;
+      }
+     }
+    }
+   }
+   if(!stack.isEmpty()){
+    status[i] = true;
+   }
+   stack.clear();
+  }
+
+  for (int i = 0; i < n; i++) {
+   System.out.println(status[i] ? "NO" : "YES");
+  }
+ }
+
+}
+
+class CharacterStack {
+ private class Node {
+  Character data;
+  Node next;
+ }
+
+ Node top;
+
+ public Character peek() {
+  return top == null ? null : top.data;
+ }
+ 
+ public boolean isEmpty() {
+  return top == null ? true : false;
+ }
+
+ public void clear() {
+  top = null;
+ }
+
+ public void push(Character data) {
+  Node node = new Node();
+  node.data = data;
+  node.next = top;
+  top = node;
+ }
+
+ public int pop() {
+  Character data = null;
+  if (top != null) {
+   data = top.data;
+   top = top.next;
+  }
+  return data;
+ }
+
+ public void print() {
+  Node temp = top;
+  while (temp != null) {
+   System.out.print(temp.data + " ");
+   temp = temp.next;
+  }
+  System.out.println();
+  return;
+ }
+}
+
+4th
+
+import java.io.*;
+import java.util.*;
+import java.text.*;
+import java.math.*;
+import java.util.regex.*;
+
+public class Solution {
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int g = in.nextInt();
+        for(int a0 = 0; a0 < g; a0++){
+            int n = in.nextInt();
+            int m = in.nextInt();
+            int x = in.nextInt();
+            long[] aSum = new long[n];
+            aSum[0] = in.nextInt();
+            for(int a_i=1; a_i < n; a_i++){
+                aSum[a_i] = aSum[a_i-1] + in.nextInt();
+            }
+            
+            int result = lowerEq(aSum,x,0,n-1)+1;
+            long bSum = 0;
+            for(int b_i=0; b_i < m; b_i++){
+                bSum += in.nextInt();
+                if(bSum<=x){
+                    result = Math.max(result, b_i+1+lowerEq(aSum,x-bSum,0,n-1)+1);
+                }
+            }
+            
+            System.out.println(result);
+        }
+    }
+    
+    private static int lowerEq(long[] a, long value, int from, int to) {
+  if (a[from] > value)
+   return -1;
+  int mid;
+  while (from != to) {
+   mid = (from + to) / 2 + 1;
+   if (a[mid] > value)
+    to = mid - 1;
+   else
+    from = mid;
+  }
+        
+  return from;
+ }
+}
+
+5th
+
+import java.io.IOException;
+
+public class Solution {
+
+    public static void main(String[] args) throws IOException {
+
+        java.io.BufferedReader stdin = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+        int nTest = Integer.parseInt(stdin.readLine());
+
+        String[] cases = new String[nTest];
+
+        for (int i = 0; i < cases.length; i++) {
+            cases[i] = stdin.readLine().toLowerCase();
+        }
+
+        for (int i = 0; i < cases.length; i++) {
+            System.out.println(findMinimumStringLength(cases[i]));
+        }
+    }
+
+    private static int findMinimumStringLength(String inputStr) {
+
+        if (inputStr.length() <= 1) {
+            return inputStr.length();
+        }
+        int[] noOfReplacements = new int[inputStr.length() - 1];
+        String trial;
+        int tempMax = Integer.MIN_VALUE, indexForMaxReplacements = 0;
+
+        for (int i = 0; i < inputStr.length() - 1; i++) {
+            if (inputStr.charAt(i) != inputStr.charAt(i + 1)) {
+                trial = inputStr.substring(0, i) + map(inputStr.charAt(i), inputStr.charAt(i + 1)) + inputStr.substring(i + 2);
+                noOfReplacements[i] = findNumberofReplacements(trial);
+            } else {
+                noOfReplacements[i] = Integer.MIN_VALUE;
+            }
+        }
+        
+        for (int i = 0; i < noOfReplacements.length; i++) {
+            int j = noOfReplacements[i];
+            if (j > tempMax) {
+                indexForMaxReplacements = i;
+                tempMax = j;
+            }
+        }
+
+        if (tempMax == Integer.MIN_VALUE) {
+            return inputStr.length();
+        }
+        return findMinimumStringLength(inputStr.substring(0, indexForMaxReplacements) + map(inputStr.charAt(indexForMaxReplacements), inputStr.charAt(indexForMaxReplacements + 1)) + inputStr.substring(indexForMaxReplacements + 2));
+    }
+
+    static int findNumberofReplacements(String inputStr) {
+        int n = 0;
+        for (int i = 0; i < inputStr.length() - 1; i++) {
+            if (inputStr.charAt(i) != inputStr.charAt(i + 1)) {
+                ++n;
+            }
+        }
+        return n;
+    }
+
+    static char map(char ch1, char ch2) {
+        if (ch1 == 'a' && ch2 == 'b') {
+            return 'c';
+        }
+
+        if (ch1 == 'a' && ch2 == 'c') {
+            return 'b';
+        }
+
+        if (ch1 == 'b' && ch2 == 'a') {
+            return 'c';
+        }
+
+        if (ch1 == 'b' && ch2 == 'c') {
+            return 'a';
+        }
+
+        if (ch1 == 'c' && ch2 == 'a') {
+            return 'b';
+        }
+
+        if (ch1 == 'c' && ch2 == 'b') {
+            return 'a';
+        }
+
+        return 'a';
+    }
+}
