@@ -1,135 +1,70 @@
-import java.util.Scanner;
+#include <bits/stdc++.h>
 
-public class Main {
+using namespace std;
 
-    int N; // Number of planets
-    int[] mass = new int[100000 + 10]; // Mass of planets
+// Function to solve the problem
 
-    void InputData() {
-        Scanner sc = new Scanner(System.in);
-        N = sc.nextInt();
-        for (int i = 0; i < N; i++) {
-            mass[i] = sc.nextInt();
-        }
-        sc.close();
-    }
+int solve(vector<int>& arr) {
 
-    public static void main(String[] args) {
-        Main m = new Main();
-        m.InputData(); // Input
-        int ans = m.solve(); // Solve the problem
-        System.out.println(ans); // Output
-    }
+int n = arr.size();
 
-    int solve() {
-        int count = N - 1; // Count neighboring pairs (always valid)
+vector<int> left(n, -1), right(n, -1); // Vectors to store left and right greater elements
 
-        // Process all pairs of planets (A, B)
-        for (int i = 0; i < N; i++) {
-            for (int j = i + 2; j < N; j++) { // Non-neighboring planets only
-                if (isValid(i, j)) {
-                    count++;
-                }
-            }
-        }
+stack<int> s;
 
-        return count;
-    }
+// Calculate the previous greater element (left)
 
-    // Check if it's valid to travel between planet A and planet B
-    boolean isValid(int A, int B) {
-        int minMass = Math.min(mass[A], mass[B]);
-        for (int k = A + 1; k < B; k++) {
-            if (mass[k] >= minMass) {
-                return false;
-            }
-        }
-        return true;
-    }
+for (int i = 0; i < n; i++) {
+
+while (!s.empty() && arr[s.top()] <= arr[i]) s.pop();
+
+if (!s.empty()) left[i] = arr[s.top()];
+
+s.push(i);
+
 }
 
+// Clear stack for the next greater element calculation
 
-import java.util.Scanner;
+while (!s.empty()) s.pop();
 
-public class Main {
-    int N; // Number of planets
-    int[] mass; // Mass of planets
+// Calculate the next greater element (right)
 
-    void InputData() {
-        Scanner sc = new Scanner(System.in);
-        N = sc.nextInt();
-        mass = new int[N];
-        for (int i = 0; i < N; i++) {
-            mass[i] = sc.nextInt();
-        }
-        sc.close();
-    }
+for (int i = n - 1; i >= 0; i--) { while (!s.empty() && arr[s.top()] <= arr[i]) s.pop(); if (!s.empty()) right[i] = arr[s.top()]; s.push(i);
 
-    public static void main(String[] args) {
-        Main m = new Main();
-        m.InputData(); // Input
-        int ans = m.solve(); // Solve the problem
-        System.out.println(ans); // Output
-    }
+}
+set<tuple<int, int, int>> uniquePairs;
 
-    int solve() {
-        int count = N - 1; // Count neighboring pairs (always valid)
+for (int i = 0; i < n; i++) {
 
-        for (int A = 0; A < N; A++) {
-            int maxInWindow = 0; // Reset max for each A
-            for (int B = A + 2; B < N; B++) {
-                maxInWindow = Math.max(maxInWindow, mass[B - 1]); // Update max in the sliding window
-                if (maxInWindow < Math.min(mass[A], mass[B])) {
-                    count++; // Valid pair
-                } 
-                // Do NOT break; continue exploring further windows
-            }
-        }
+if (left[i] != -1 && right[i] != -1 && arr[i] < left[i] && arr[i] < right[i]) {
 
-        return count;
-    }
+uniquePairs.emplace(arr[i], left[i], right[i]);
+
 }
 
-import java.util.Scanner;
+}
 
-public class Main {
-    int N; // Number of planets
-    int[] mass; // Mass of planets
+// Return the count of unique triplets plus (n - 1) for neighboring pairs I
 
-    void InputData() {
-        Scanner sc = new Scanner(System.in);
-        N = sc.nextInt();
-        mass = new int[N];
-        for (int i = 0; i < N; i++) {
-            mass[i] = sc.nextInt();
-        }
-        sc.close();
-    }
+return uniquePairs.size() + n - 1;
 
-    public static void main(String[] args) {
-        Main m = new Main();
-        m.InputData(); // Input
-        int ans = m.solve(); // Solve the problem
-        System.out.println(ans); // Output
-    }
+}
 
-    int solve() {
-        int count = N - 1; // Count neighboring pairs (always valid)
+// Main function
 
-        for (int A = 0; A < N; A++) {
-            int maxInWindow = 0; // Reset max for each A
+int main() {
 
-            for (int B = A + 2; B < N; B++) {
-                maxInWindow = Math.max(maxInWindow, mass[B - 1]); // Update max in the sliding window
+int n;
 
-                if (maxInWindow < Math.min(mass[A], mass[B])) {
-                    count++; // Valid pair
-                }
+cin >> n; // Input size of the array
 
-                // No need to break; continue checking further windows
-            }
-        }
+vector<int> arr(n);
 
-        return count;
-    }
+for (int i = 0; i < n; i++) cin >> arr[i]; // Input array elements
+
+cout << solve(arr) << endl; // Output the result
+
+return 0;
+
 }
