@@ -1,0 +1,302 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.StringTokenizer;
+
+public class Solution implements Runnable {
+    public static void main(String[] args) throws IOException {
+        new Thread(new Solution()).start();
+    }
+
+    @Override
+    public void run() {
+        try {
+            solve();
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    final BufferedReader rd;
+    final PrintWriter wr;
+    StringTokenizer tok = null;
+
+    Solution() throws IOException {
+        rd = new BufferedReader(new InputStreamReader(System.in));
+        // rd = new BufferedReader(new FileReader(new File("input.txt")));
+        wr = new PrintWriter(System.out);
+    }
+
+
+    String nextToken() throws IOException {
+        while(tok == null || !tok.hasMoreTokens()) {
+            tok = new StringTokenizer(rd.readLine());
+        }
+        return tok.nextToken();
+    }
+
+    static class Edge implements Comparable<Edge> {
+        int a;
+        int b;
+        int c;
+
+        Edge(int a, int b, int c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        @Override
+        public int compareTo(Edge o) {
+            return Integer.compare(c, o.c);
+        }
+    }
+
+    static class DS {
+        final Random rng;
+        final int[] par;
+
+        DS(int n) {
+            rng = new Random();
+            par = new int[n];
+            for(int i = 0; i < n; ++i) {
+                par[i] = i;
+            }
+        }
+
+        int findset(int x) {
+            if(par[x] != x) {
+                par[x] = findset(par[x]);
+            }
+            return par[x];
+        }
+
+        void unite(int x, int y) {
+            x = findset(x);
+            y = findset(y);
+            if(x != y) {
+                if(rng.nextBoolean()) {
+                    par[x] = y;
+                } else {
+                    par[y] = x;
+                }
+            }
+        }
+    }
+
+    int n;
+    long[] d;
+    ArrayList<Edge>[] te;
+
+    long rec(int x, int px) {
+        if(d[x] != -1) {
+            return d[x];
+        }
+
+        long result = 1;
+        for(Edge e : te[x]) {
+            if(e.a != x && e.a != px) {
+                result += rec(e.a, x);
+            }
+            if(e.b != x && e.b != px) {
+                result += rec(e.b, x);
+            }
+        }
+        d[x] = result;
+        return d[x];
+    }
+
+    void solve() throws IOException {
+        n = Integer.parseInt(nextToken());
+        int m = Integer.parseInt(nextToken());
+        Edge[] e = new Edge[m];
+
+        for(int i = 0; i < m; ++i) {
+            int a = Integer.parseInt(nextToken()) - 1;
+            int b = Integer.parseInt(nextToken()) - 1;
+            int c = Integer.parseInt(nextToken());
+            e[i] = new Edge(Math.min(a, b), Math.max(a, b), c);
+        }
+
+        Arrays.sort(e);
+        DS ds = new DS(n);
+        boolean[] u = new boolean[m];
+        d = new long[n];
+        te = new ArrayList[n];
+        Arrays.fill(d, -1);
+        Arrays.fill(u, false);
+        for(int i = 0; i < n; ++i) {
+            te[i] = new ArrayList<>();
+        }
+        for(int i = 0; i < m; ++i) {
+            if(ds.findset(e[i].a) != ds.findset(e[i].b)) {
+                ds.unite(e[i].a, e[i].b);
+                te[e[i].a].add(e[i]);
+                te[e[i].b].add(e[i]);
+                u[i] = true;
+            }
+        }
+        rec(0, -1);
+        ArrayList<Long> bits = new ArrayList<Long>();
+        long carry = 0;
+        for(int i = 0; i < m; ++i) {
+            long v = carry;
+            if(u[i]) {
+                long base = Math.min(d[e[i].a], d[e[i].b]);
+                v += base * (n - base);
+            }
+            bits.add(v % 2);
+            carry = v / 2;
+        }
+        while(carry > 0) {
+            bits.add(carry % 2);
+            carry = carry / 2;
+        }
+        int start = -1;
+        for(int i = bits.size() - 1; i >= 0; --i) {
+            if(bits.get(i) > 0) {
+                start = i;
+                break;
+            }
+        }
+
+        // long res = 0;
+        if(start == -1) {
+            wr.println(0);
+            // res = 0;
+        } else {
+            for(int i = start; i >= 0; --i) {
+                wr.print(bits.get(i));
+                // res = res * 2 + bits.get(i);
+            }
+            wr.println();
+        }
+
+        // BF
+        /*
+        int[][] g = new int[n][n];
+        for(int i = 0; i < n; ++i) {
+            for(int j = 0; j < n; ++j) {
+                if(i == j) {
+                    g[i][j] = 0;
+                } else {
+                    g[i][j] = Integer.MAX_VALUE;
+                }
+            }
+        }
+        for(int i = 0; i < m; ++i) {
+            g[e[i].a][e[i].b] = Math.min(g[e[i].a][e[i].b], 1 << e[i].c);
+            g[e[i].b][e[i].a] = Math.min(g[e[i].b][e[i].a], 1 << e[i].c);
+        }
+        for(int k = 0; k < n; ++k) {
+            for(int i = 0; i < n; ++i) {
+                for(int j = 0; j < n; ++j) {
+                    if(g[i][k] != Integer.MAX_VALUE && g[k][j] != Integer.MAX_VALUE) {
+                        g[i][j] = Math.min(g[i][j], g[i][k] + g[k][j]);
+                    }
+                }
+            }
+        }
+        long bfres = 0;
+        for(int i = 0; i < n; ++i) {
+            for(int j = i + 1; j < n; ++j) {
+                bfres += g[i][j];
+            }
+        }
+
+        System.err.println(res);
+        System.err.println(bfres);
+        */
+
+        wr.close();
+    }
+}
+
+
+
+
+
+
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    static Scanner in = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
+    static StringBuffer sb = new StringBuffer();
+
+    static Map<String, Collection<String>> mainRoadsMap;
+    static int[] dists;
+
+    public static void main(String[] args) {
+	    int testCases = in.nextInt();
+        for (int i = 0; i < testCases; i++) {
+            processTestCase();
+        }
+        System.out.println(sb.toString());
+    }
+
+    static void processTestCase() {
+        int n = in.nextInt();
+        readMainRoadsMap();
+        int s = in.nextInt();
+        traverseMap(n, s);
+        writeResults(n, s);
+    }
+
+    static void readMainRoadsMap() {
+        int m = in.nextInt();
+        mainRoadsMap = new HashMap<String, Collection<String>>();
+        for (int i = 0; i < m; i++) {
+            String x = in.next();
+            String y = in.next();
+            if (!mainRoadsMap.containsKey(x)) {
+                mainRoadsMap.put(x, new ArrayList<String>());
+            }
+            if (!mainRoadsMap.containsKey(y)) {
+                mainRoadsMap.put(y, new ArrayList<String>());
+            }
+            mainRoadsMap.get(x).add(y);
+            mainRoadsMap.get(y).add(x);
+        }
+    }
+
+    static void traverseMap(int n, int s) {
+        List<String> queue = new ArrayList<String>();
+        boolean[] visited = new boolean[n+1];
+        dists = new int[n + 1];
+
+        queue.add(String.valueOf(s));
+        visited[s] = true;
+
+        int counter = 1;
+        while (!queue.isEmpty() && counter < n) {
+            String v = queue.remove(0);
+            int vi = Integer.valueOf(v);
+            Collection<String> nbs = mainRoadsMap.containsKey(v) ? mainRoadsMap.get(v) : new ArrayList<String>();
+            boolean[] isNb = new boolean[n+1];
+            for (String nb : nbs) {
+                isNb[Integer.parseInt(nb)] = true;
+            }
+
+            for (int i = 1; i <= n; i++) {
+                if (!visited[i] && !isNb[i]) {
+                    dists[i] = dists[vi] + 1;
+                    queue.add(String.valueOf(i));
+                    visited[i] = true;
+                    counter++;
+                }
+            }
+        }
+    }
+
+    static void writeResults(int n, int s) {
+        for (int i = 1; i < s; i++) {
+            sb.append(dists[i]).append(' ');
+        }
+        for (int i = s + 1; i <= n; i++) {
+            sb.append(dists[i]).append(' ');
+        }
+        sb.append('\n');
+    }
+}
