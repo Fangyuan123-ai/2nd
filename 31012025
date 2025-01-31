@@ -1,0 +1,290 @@
+import java.io.*;
+import java.util.*;
+import java.text.*;
+import java.math.*;
+import java.util.regex.*;
+
+public class Solution {
+
+    public static void main(String args[] ) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int[] coins = convert(br.readLine());
+        int amount = Integer.parseInt(br.readLine().trim());
+        System.out.println(coinChange(coins, amount));
+
+    }
+    public static int coinChange(int[] coins, int amount) {
+        if (amount == 0 || coins == null || coins.length == 0) return 0;
+        Integer[][] preComputed = new Integer[amount+1][coins.length];
+        for (int i=0; i < coins.length; i++) {
+            preComputed[0][i] = 1;
+        }
+        return coinChange(coins, amount, 0, preComputed);
+
+    }
+    
+    private static int coinChange(int[] coins, int amount, int curr, Integer[][] preComputed) {
+        if (curr >= coins.length) return 0;
+        if (preComputed[amount][curr] != null) return preComputed[amount][curr];
+        if (coins[curr] > amount) {
+            preComputed[amount][curr] = coinChange(coins, amount, curr + 1, preComputed);
+        } else {
+            preComputed[amount][curr] = coinChange(coins, amount, curr+1, preComputed)
+                    + coinChange(coins, amount-coins[curr], curr, preComputed);
+        }
+        return preComputed[amount][curr];
+    }
+    
+    public static int[] convert(String str) {
+        String[] arr = str.split(",");
+        int[] val = new int[arr.length];
+        for (int i =0; i<arr.length; i++) {
+            val[i] = Integer.parseInt(arr[i].trim());
+        }
+        
+        return val;
+    }
+}
+
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.InputMismatchException;
+
+public class Solution {
+	static InputStream is;
+	static PrintWriter out;
+	static String INPUT = "";
+	
+	static void solve()
+	{
+		for(int T = ni();T >= 1;T--){
+			int n = ni();
+			int[] a = na(n);
+			int min = 99999;
+			for(int i = 0;i < n;i++){
+				min = Math.min(min, a[i]);
+			}
+			int gm = 999999999;
+			for(int i = min; i >= min-10;i--){
+				int count = 0;
+				for(int j = 0;j < n;j++){
+					int v = a[j]-i;
+					int lc = v/5+(v%5/2)+(v%5%2);
+					count += lc;
+				}
+				gm = Math.min(gm, count);
+			}
+			out.println(gm);
+		}
+	}
+	
+	public static void main(String[] args) throws Exception
+	{
+		long S = System.currentTimeMillis();
+		is = INPUT.isEmpty() ? System.in : new ByteArrayInputStream(INPUT.getBytes());
+		out = new PrintWriter(System.out);
+		
+		solve();
+		out.flush();
+		long G = System.currentTimeMillis();
+		tr(G-S+"ms");
+	}
+	
+	private static byte[] inbuf = new byte[1024];
+	static int lenbuf = 0, ptrbuf = 0;
+	
+	private static int readByte()
+	{
+		if(lenbuf == -1)throw new InputMismatchException();
+		if(ptrbuf >= lenbuf){
+			ptrbuf = 0;
+			try { lenbuf = is.read(inbuf); } catch (IOException e) { throw new InputMismatchException(); }
+			if(lenbuf <= 0)return -1;
+		}
+		return inbuf[ptrbuf++];
+	}
+	
+	private static int[] na(int n)
+	{
+		int[] a = new int[n];
+		for(int i = 0;i < n;i++)a[i] = ni();
+		return a;
+	}
+	
+	private static int ni()
+	{
+		int num = 0, b;
+		boolean minus = false;
+		while((b = readByte()) != -1 && !((b >= '0' && b <= '9') || b == '-'));
+		if(b == '-'){
+			minus = true;
+			b = readByte();
+		}
+		
+		while(true){
+			if(b >= '0' && b <= '9'){
+				num = num * 10 + (b - '0');
+			}else{
+				return minus ? -num : num;
+			}
+			b = readByte();
+		}
+	}
+	
+	private static void tr(Object... o) { if(INPUT.length() != 0)System.out.println(Arrays.deepToString(o)); }
+}
+
+
+import java.io.*;
+import java.util.*;
+import java.text.*;
+import java.math.*;
+import java.util.regex.*;
+
+ public class Solution{
+    public static long sum(long arr[],int M)
+    {  // long sum=0;
+        // long temp[]=new long[M];
+       long te=0;long se=0;
+         for (int i = 1; i <M; i++)
+        {
+           if(i==1){se=te=arr[1]-arr[0];}
+            else
+            {
+                te=te+(i)*(arr[i]-arr[i-1]);
+                se=se+te;
+            }
+            /*for (int j = i+1; j <=M; j++) 
+            {
+                sum+=arr[j]-arr[i];
+            }*/
+        }
+        return se;
+    }
+
+    public static void main(String[] args)
+    {   //System.out.println("start");
+        Scanner scan=new Scanner(System.in);
+        int N=scan.nextInt();
+        int M=scan.nextInt();
+        long a[]=new long[N];
+        for (int i = 0; i < N; i++)
+        {
+         a[i]=scan.nextInt();
+        }
+        Arrays.sort(a);
+ 
+        /* for (int i = 0; i < N; i++)
+        {
+          System.out.println(a[i]);    
+        }*/
+        if(N==M)
+        {
+            System.out.println(a[0]-a[N-1]);
+        }
+        long min=sum(a,M);
+        //System.out.println("min is"+min);
+        long temp=0;
+        long sum=min;
+        long l=0;
+        long ar=0; 
+        for (int c =M; c <N; c++) 
+        {   temp=0;
+            if(c==M)
+            {
+              for (int i = 1; i <M; i++)
+               {
+                ar+=a[M]-a[i];
+                l+=a[0]-a[i];
+               } 
+            temp=ar+l;  
+            }
+            
+            else
+            {
+            l=l+(M-1)*(a[c-M]-a[c-M-1])+a[c-M]-a[c-1];
+            ar=ar+(M-1)*(a[c]-a[c-1])+a[c-M]-a[c-1];
+            temp=ar+l;
+            }
+          sum+=temp;  
+        //temp=a[(i+M)-1]-a[i];
+        if(sum<min)min=sum;
+        }
+        System.out.println(min);
+        /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution. */
+    }
+}
+
+
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.*;
+
+
+public class Solution {	
+	BufferedReader reader;
+    StringTokenizer tokenizer;
+    PrintWriter out;
+    
+	public void solve() throws IOException {				
+		int N = nextInt();
+        for (int i = 0; i < N; i++) {
+            long input = nextLong();
+            long output = 0;
+            for (int j = 0; j < 32; j++) {
+                if ((input & (1L<<j)) == 0) {
+                    output += (1L << j);
+                }
+            }
+            out.println(output);
+        }
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		new Solution().run();
+	}
+	
+	public void run() {
+        try {
+            reader = new BufferedReader(new InputStreamReader(System.in));
+            tokenizer = null;
+            out = new PrintWriter(System.out);
+            solve();
+            reader.close();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    int nextInt() throws IOException {
+        return Integer.parseInt(nextToken());
+    }
+
+    long nextLong() throws IOException {
+        return Long.parseLong(nextToken());
+    }
+
+    double nextDouble() throws IOException {
+        return Double.parseDouble(nextToken());
+    }
+
+    String nextToken() throws IOException {
+        while (tokenizer == null || !tokenizer.hasMoreTokens()) {
+            tokenizer = new StringTokenizer(reader.readLine());
+        }
+        return tokenizer.nextToken();
+    }
+
+}
