@@ -1,0 +1,65 @@
+// Updated frontend changes
+const onFinish = async (values) => {
+  setLoading(true);
+  try {
+    const response = await vodHomePrvInstance.post(LOGIN, {
+      username: values.username,
+      password: values.password,
+      stage: values.stage // Add stage parameter from form
+    });
+
+    if (response?.status === 200) {
+      setIsModalVisible(true);
+    } else {
+      Modal.error({
+        title: "Error",
+        content: "Invalid Username and password!",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    Modal.error({
+      title: "Error",
+      content: error.response?.data?.message || "Login failed!",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
+// Change from @GetMapping to @PostMapping
+@PostMapping(value = "/login")
+public ResponseEntity<?> login(
+    @RequestBody LoginRequest loginRequest // Receive proper DTO
+) throws Exception {
+    // Existing logic
+}
+
+
+
+public class LoginRequest {
+    private String username;
+    private String password;
+    private String stage;
+    // getters & setters
+}
+
+
+
+<Form.Item
+  name="stage"
+  label="Stage"
+  rules={[{ required: true }]}
+>
+  <Select defaultValue="qa2" style={{ width: 150 }}>
+    <Option value="qa2">QA2</Option>
+    <Option value="prod">PROD</Option>
+    <Option value="local">LOCAL</Option>
+  </Select>
+</Form.Item>
+
+
+
