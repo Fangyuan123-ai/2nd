@@ -63,3 +63,107 @@ public class LoginRequest {
 
 
 
+import java.io.*;
+import java.util.*;
+
+enum States {
+    Snake,
+    Ladder,
+    None
+}
+
+public class Solution {
+
+    public static void main(String[] args) {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int count = 0;
+        try {
+            int $case = Integer.parseInt(br.readLine());
+            for (int _case = 0; _case < $case; _case++) {
+                int arr[][] = new int[100][6];
+                States s[] = new States[100];
+                for (int k = 0; k < 100; k++) {
+                    s[k] = States.None;
+                }
+                int ladders = Integer.parseInt(br.readLine());
+                for (int j = 0; j < ladders; j++) {
+                    String str[] = br.readLine().split("\\s");
+                    for (int k = 0; k < 6; k++) {
+                        arr[Integer.parseInt(str[0]) - 1][k] = Integer.parseInt(str[1]);
+                    }
+                    s[Integer.parseInt(str[0]) - 1] = States.Ladder;
+                }
+                int snakes = Integer.parseInt(br.readLine());
+                for (int j = 0; j < snakes; j++) {
+                    String str[] = br.readLine().split("\\s");
+                    for (int k = 0; k < 6; k++) {
+                        arr[Integer.parseInt(str[0]) - 1][k] = Integer.parseInt(str[1]);
+                    }
+                    s[Integer.parseInt(str[0]) - 1] = States.Snake;
+                }
+
+                /*for (int i = 0; i < 100; i++) {
+                    if (s[i] == States.None) {
+                        for (int j = 0; j < 6; j++) {
+                            arr[i][j] = (j + 1) + 1;
+                        }
+                    }
+                }*/
+
+                /*for (int i = 0; i < 100; i++) {
+                    System.out.print(i + 1 + " :-");
+                    for (int j = 0; j < 6; j++) {
+                        System.out.print(arr[i][j] + " ");
+                    }
+                    System.out.println(s[i]);
+                }*/
+                count = 0;
+                int max = -1;
+                int maxindex = 0;
+                int t = 0;
+                while (ladders > 0) {
+                    if (s[t] == States.Ladder) {
+                        ladders--;
+                        if (arr[t][0] > max) {
+                            max = arr[t][0];
+                            maxindex = t;
+                        }
+                    }
+                    t++;
+                }
+                int left = 100 - max;
+                int dice = 6;
+                int win = 100;
+                while (left > 0) {
+                    if (dice <= 0) {
+                        System.out.println("-1");
+                        return;
+                    }
+                    if ((left - dice) >= 0 && s[(win - dice) - 1] != States.Snake) {
+                        count++;
+                        left -= dice;
+                        win -= dice;
+                        dice = 6;
+                    } else {
+                        dice--;
+                    }
+                }
+                left = maxindex;
+                while (left > 0) {
+                    if ((left - dice) >= 0 && s[(win - dice) - 1] != States.Snake) {
+                        count++;
+                        left -= dice;
+                        win -= dice;
+                        dice = 6;
+                    } else {
+                        dice--;
+                    }
+                }
+                System.out.println(count);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } 
+    }
+}
