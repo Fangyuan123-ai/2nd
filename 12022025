@@ -90,3 +90,149 @@ public class Solution {
         bufferedWriter.close();
     }
 }
+
+
+
+
+import java.io.*; 
+import java.util.*; 
+class Solution{
+static int mod = 1000000007;
+static long MAX = 1000000000000000009l;
+static PrintWriter out = new PrintWriter(System.out);
+static void build(long seg[],int l,int r,int pos,long pre[]){
+
+if(l==r){
+seg[pos]=pre[l];
+return;
+}
+int m =(l+r)/2;
+build(seg,l,m,2*pos+1,pre);
+build(seg,m+1,r,2*pos+2,pre);
+seg[pos]=Math.min(seg[2*pos+1],seg[2*pos+2]);
+}
+static long query(long seg[],int l,int r,int ql,int qr,int pos){
+
+              if(ql>r||qr<l)
+                  return MAX;
+              if(ql<=l&&qr>=r)
+                  return seg[pos];
+              int m=(l+r)/2;
+              return Math.min( query(seg,l,m,ql,qr,2*pos+1),query(seg,m+1,r,ql,qr,2*pos+2));
+}
+public static void main (String[] args){ 
+   
+     int n = ni();
+     long c = nl();
+     int a[] = new int[n]; // use
+     int b[] = new int[n]; // need 
+     long pre[] = new long[2*n];
+      for(int i=0;i<n;i++)
+         a[i] = ni();
+      long max=0;
+     for(int i=0;i<n;i++)
+       {  b[i] = ni(); if(max<b[i])max=b[i] ;pre[i]=a[i]-b[i];}
+    int ans=0;
+    if(max<=c){
+
+     long seg[] = new long[7*n];
+     for(int i=n;i<2*n;i++)
+        pre[i]=pre[i-n];
+     for(int i=1;i<2*n;i++)
+        pre[i]=pre[i]+pre[i-1];
+        build(seg,0,2*n-1,0,pre);
+        int il=0,ir=n-1;
+     // System.out.println("  min:"+query(seg,0,2*n-1,il,ir,0));
+        if(query(seg,0,2*n-1,il,ir,0)>=0)
+              ans++; 
+             il++;ir++;
+       //System.out.println(" ans :"+ans) ;
+        while(il<n){
+             if(query(seg,0,2*n-1,il,ir,0)>=pre[il-1])
+              ans++; 
+              il++;ir++;
+        }
+     }
+       System.out.println(ans);
+       out.flush();
+} 
+
+    static FastReader sc=new FastReader(); 
+ 
+      static int ni(){
+                 int x = sc.nextInt();
+                 return(x);
+        }
+      static long nl(){
+              long x = sc.nextLong();
+              return(x);
+         }
+      static String n(){
+                 String str = sc.next();
+                     return(str);
+       }
+     static String ns(){
+                 String str = sc.nextLine();
+                   return(str);
+      }
+     static double nd(){
+               double d = sc.nextDouble();
+                 return(d);
+       }
+  static class FastReader 
+    { 
+        BufferedReader br; 
+        StringTokenizer st; 
+  
+        public FastReader() 
+        { 
+            br = new BufferedReader(new
+                     InputStreamReader(System.in)); 
+        } 
+  
+        String next() 
+        { 
+            while (st == null || !st.hasMoreElements()) 
+            { 
+                try
+                { 
+                    st = new StringTokenizer(br.readLine()); 
+                } 
+                catch (IOException  e) 
+                { 
+                    e.printStackTrace(); 
+                } 
+            } 
+            return st.nextToken(); 
+        } 
+  
+        int nextInt() 
+        { 
+            return Integer.parseInt(next()); 
+        } 
+  
+        long nextLong() 
+        { 
+            return Long.parseLong(next()); 
+        } 
+  
+        double nextDouble() 
+        { 
+            return Double.parseDouble(next()); 
+        } 
+  
+        String nextLine() 
+        { 
+            String str = ""; 
+            try
+            { 
+                str = br.readLine(); 
+            } 
+            catch (IOException e) 
+            { 
+                e.printStackTrace(); 
+            } 
+            return str; 
+        } 
+    } 
+}
