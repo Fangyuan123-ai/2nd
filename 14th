@@ -100,3 +100,98 @@ Input
 Output
 2
 ⋇ Please keep the input and output formats carefully
+
+
+
+
+import java.util.*;
+
+public class Main {
+    int N;
+    String Info;
+    HashSet<String> vertices = new HashSet<>();
+    HashSet<String> edges = new HashSet<>();
+    HashMap<String, List<String>> adjacency = new HashMap<>();
+
+    void InputData() {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt();
+        Info = sc.next();
+        sc.close();
+    }
+
+    void simulatePath() {
+        int currentX = 0, currentY = 0;
+        vertices.add(currentX + "," + currentY);
+
+        for (char c : Info.toCharArray()) {
+            int dir = Character.getNumericValue(c);
+            int dx = 0, dy = 0;
+            switch (dir) {
+                case 0: dx = 1; break; // East
+                case 1: dx = -1; break; // West
+                case 2: dy = -1; break; // South
+                case 3: dy = 1; break; // North
+            }
+
+            int nextX = currentX + dx;
+            int nextY = currentY + dy;
+
+            String currentKey = currentX + "," + currentY;
+            String nextKey = nextX + "," + nextY;
+
+            vertices.add(currentKey);
+            vertices.add(nextKey);
+
+            String edge;
+            if (currentX < nextX || (currentX == nextX && currentY < nextY)) {
+                edge = currentKey + "," + nextKey;
+            } else {
+                edge = nextKey + "," + currentKey;
+            }
+            edges.add(edge);
+
+            adjacency.computeIfAbsent(currentKey, k -> new ArrayList<>()).add(nextKey);
+            adjacency.computeIfAbsent(nextKey, k -> new ArrayList<>()).add(currentKey);
+
+            currentX = nextX;
+            currentY = nextY;
+        }
+    }
+
+    int countConnectedComponents() {
+        Set<String> visited = new HashSet<>();
+        int count = 0;
+        for (String v : vertices) {
+            if (!visited.contains(v)) {
+                count++;
+                Queue<String> queue = new LinkedList<>();
+                queue.add(v);
+                visited.add(v);
+                while (!queue.isEmpty()) {
+                    String current = queue.poll();
+                    for (String neighbor : adjacency.getOrDefault(current, new ArrayList<>())) {
+                        if (!visited.contains(neighbor)) {
+                            visited.add(neighbor);
+                            queue.add(neighbor);
+                        }
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public static void main(String[] args) {
+        Main m = new Main();
+        m.InputData();
+        m.simulatePath();
+
+        int V = m.vertices.size();
+        int E = m.edges.size();
+        int C = m.countConnectedComponents();
+
+        int enclosed = E - V + C;
+        System.out.println(Math.max(enclosed, 0));
+    }
+}
