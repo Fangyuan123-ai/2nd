@@ -1,0 +1,138 @@
+‘Quick Parcel’ is a small parcel delivery company that operates two offices in the area. ‘Quick Parcel’ intends to ask you to develop a program that sets a travel route that minimizes the total fuel quantities consumed in the process of collecting as many parcels as possible so that the company can secure a competitive edge in a low parcel fee service in this era of high oil prices.
+
+
+[Requirement]
+
+A truck departs from each of two offices in order to collect the parcels. N parcel collection points are allotted effectively so that these two trucks move to each point, collect parcels and return to the office from which they departed.
+At this time, there are many possible travel routes that trucks from each office can choose to follow to collect the parcels. If it is decided that the truck departing from office A moves to (8, 12) and returns to office A via (30,30) and the truck departing from office B moves to (5, 5) and returns to office B, the total quantity of fuel required for such movements is 294, as shown in the calculation in Figure 2.
+The program should set the travel routes so that the total fuel quantities consumed during the movement by the two trucks is minimized. (The number of points at which each truck will collect parcels can be selected from 0 to N. If the number of points where a truck will collect parcels is 0, it means the relevant truck will not move.)
+
+
+
+The location of stores and parcel collection points are given as x and y coordinates, and the distance between any two points is defined as follows.
+
+
+
+(difference in the x-coordinates of two points)                
+             + (difference between the y-coordinates)
+
+
+
+At this time, the fuel quantities required for moving between two points is as follows
+
+
+
+(distance) * (1 + number of parcels in the truck) 
+
+
+
+ When a truck first departs, there are no parcels in the truck, and each time the truck stops at a parcel collection point, one parcel is added to the truck.
+
+
+
+ Let's take an example. Let’s assume that two offices are located at (10, 10) and (20, 20) and the number of parcel collection points N is 3, located at (5, 5), (8, 12) and (30, 30) as shown in Figure 1 below
+
+However, if a different method is selected, the total fuel quantities change.
+If it is decided that the truck departing from office A moves to (5, 5) and returns to office A via (8, 12) and the truck departing from office B moves to (20, 20) and returns to office B, the total of fuel quantities required for the movements is 102, as shown in Figure 3.
+This is the sum of required fuel quantities for the least movement from among all methods that can be selected.
+
+ Find the minimum fuel quantities required for the two trucks to collect all parcels from N parcel collection points allotted effectively and return to the offices of origin
+
+[Input format]
+In the first line, the number of parcel collection points N is given. (3 ≤ N ≤ 8)
+
+
+
+In the second line, the location information ( x-coordinate andy-coordinate ) of office A separated by a blank is given.
+
+
+
+In the third line, the location information (x-coordinate andy-coordinate) of office B separated by a blank is given.
+
+
+
+Afterwards, the location information of one parcel collection point, x-coordinate and y-coordinate separated by a blank, is inputted in each line over N lines.
+
+(-2000 ≤ x-coordinate, y-coordinate ≤ 2000)
+
+
+[Output format]
+Output the minimum value of the total fuel quantities required for the two trucks when the trucks are operated according to the requirements stipulated in this question.
+
+Input/Output Example
+
+Input
+3
+10 10
+20 20
+5 5
+12 8
+30 30
+Output
+102
+⋇ Please keep the input and output formats carefully
+
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.StringTokenizer;
+
+public class Main {
+	class POS {
+		int x, y;
+		POS(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
+
+	InputStreamReader reader;
+	BufferedReader br;
+	BufferedWriter bw;
+	
+	int N;
+	POS base[];
+	POS pos[];
+
+	void inputData() throws Exception {
+		reader = new InputStreamReader(System.in);
+		br = new BufferedReader(reader);
+		bw = new BufferedWriter(new OutputStreamWriter(System.out));
+		StringTokenizer st;
+
+		st = new StringTokenizer(br.readLine());
+		N = Integer.parseInt(st.nextToken());
+		base = new POS[2];
+		pos = new POS[N];
+		for (int i = 0; i < 2; i++) {
+			int x, y;
+			st = new StringTokenizer(br.readLine());
+			x = Integer.parseInt(st.nextToken());
+			y = Integer.parseInt(st.nextToken());
+			base[i] = new POS(x, y);
+		}
+		for (int i = 0; i < N; i++) {
+			int x, y;
+			st = new StringTokenizer(br.readLine());
+			x = Integer.parseInt(st.nextToken());
+			y = Integer.parseInt(st.nextToken());
+			pos[i] = new POS(x, y);
+		}
+	}
+
+	public static void main(String[] args) throws Exception {
+		int ans = -1;
+
+		Main m = new Main();
+
+		m.inputData(); // 입력 받는 부분 Input
+
+		// 여기서 부터 작성 Write the code
+
+		// 출력 하는 부분 Output
+		m.bw.write(ans + "\n");
+		m.bw.flush();
+	}
+}
