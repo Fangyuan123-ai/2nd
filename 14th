@@ -1,0 +1,102 @@
+Problem Solving_2] Dividing an Area
+Category
+Programming
+Points
+30p
+Execution timeout
+1s
+[Download test cases]
+Let's find the number of areas created by the LineBot, a robot that draws lines.
+
+
+[Requirement]
+In order to classify the areas for soil analysis on the moon, it was decided to send the LineBot that could draw a straight line on the moon’s surface to the moon.
+
+
+
+The LineBot, which the Space Science Institute decided to send to the moon, is a robot that can move in four directions including East, West, South and North, while drawing lines on the surface of the moon. It was decided that after the LineBot had moved on the surface of the moon and drawn lines, areas completely surrounded by such lines would be selected as exploration areas for soil analysis.
+
+
+
+However, due to the impact of the moon landing, the﻿ LineBot could not identify the coordinates of its landing site and sent only its path of N movements to the control center. The direction information sent consists of the numbers including 0 (East), 1 (West), 2 (South), and 3 (North), and this information is the direction information generated as the LineBot moves along a random path. The LineBot may have repeatedly passed or crossed the area where a line was drawn, or may not have been able to create an enclosed exploration area.
+
+
+For example, if N is 14 and the information sent is 33302111220000, the LineBot might have started moving North from the blue arrow and moved while drawing a line as shown in <Figure 1>. At this time, a total of two exploration areas are selected, which are yellow areas completely surrounded by lines.
+
+Based on the received information, find how many exploration areas are created by the LineBot.
+
+However, if no exploration area has been created, 0 is outputted.
+
+
+[Input format]
+In the first line, the number of movements N is inputted. (1 ≤ N ≤ 1,000)
+
+
+In the second line, the information of N moving directions is inputted. (0: East, 1: West, 2: South, 3: North) 
+import java.util.Scanner;
+2
+​
+3
+public class Main {
+4
+  int N; // 이동 정보의 개수
+5
+  String Info; // 정사각형을 생성하고자 하는 배열
+6
+​
+7
+  void InputData() {
+8
+    Scanner sc = new Scanner(System.in);
+9
+    N = sc.nextInt();
+10
+    Info = sc.next();
+11
+​
+12
+    sc.close();
+13
+  }
+14
+​
+15
+  public static void main(String[] args) {
+16
+    int sol = -1;
+17
+    Main m = new Main();
+18
+​
+19
+    m.InputData(); // 입력 받는 부분
+20
+​
+21
+    // 여기서부터 작성
+22
+​
+23
+    System.out.print(sol); // 출력하는 부분
+24
+​
+25
+  }
+26
+}
+
+
+[Output format]
+Find the number of areas completely surrounded by lines.
+
+However, if no area has been completely surrounded, 0 is outputted.
+
+Input/Output Example
+
+Example 1
+Input
+14
+33302111220000
+Output
+2
+⋇ Please keep the input and output formats carefully
