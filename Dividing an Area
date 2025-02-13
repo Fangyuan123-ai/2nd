@@ -1,13 +1,12 @@
 import java.util.*;
 
 public class Main {
+    int N;
+    String Info;
+    HashSet<String> vertices = new HashSet<>();
+    HashSet<String> edges = new HashSet<>();
+    HashMap<String, List<String>> adjacency = new HashMap<>();
 
-    int N; // Number of movements
-    String Info; // Direction information
-    Set<String> edges; // To store the edges of the path
-    Set<String> visitedNodes; // To store visited nodes
-
-    // Input method
     void InputData() {
         Scanner sc = new Scanner(System.in);
         N = sc.nextInt();
@@ -15,103 +14,78 @@ public class Main {
         sc.close();
     }
 
-    // Method to count the areas formed by the LineBot's movement
-    int calculateAreas() {
-        edges = new HashSet<>();
-        visitedNodes = new HashSet<>();
-
-        // Start position
-        int x = 0, y = 0;
-        visitedNodes.add(encode(x, y));
-
-        // Directions: 0 = East, 1 = West, 2 = South, 3 = North
-        int[] dx = {1, -1, 0, 0};
-        int[] dy = {0, 0, 1, -1};
+    void simulatePath() {
+        int currentX = 0, currentY = 0;
+        vertices.add(currentX + "," + currentY);
 
         for (char c : Info.toCharArray()) {
-            int direction = c - '0';
-            int nx = x + dx[direction];
-            int ny = y + dy[direction];
+            int dir = Character.getNumericValue(c);
+            int dx = 0, dy = 0;
+            switch (dir) {
+                case 0: dx = 1; break; // East
+                case 1: dx = -1; break; // West
+                case 2: dy = -1; break; // South
+                case 3: dy = 1; break; // North
+            }
 
-            // Add edge in both directions to track undirected edges
-            edges.add(encodeEdge(x, y, nx, ny));
-            edges.add(encodeEdge(nx, ny, x, y));
+            int nextX = currentX + dx;
+            int nextY = currentY + dy;
 
-            visitedNodes.add(encode(nx, ny));
+            String currentKey = currentX + "," + currentY;
+            String nextKey = nextX + "," + nextY;
 
-            // Move to the next position
-            x = nx;
-            y = ny;
+            vertices.add(currentKey);
+            vertices.add(nextKey);
+
+            String edge;
+            if (currentX < nextX || (currentX == nextX && currentY < nextY)) {
+                edge = currentKey + "," + nextKey;
+            } else {
+                edge = nextKey + "," + currentKey;
+            }
+            edges.add(edge);
+
+            adjacency.computeIfAbsent(currentKey, k -> new ArrayList<>()).add(nextKey);
+            adjacency.computeIfAbsent(nextKey, k -> new ArrayList<>()).add(currentKey);
+
+            currentX = nextX;
+            currentY = nextY;
         }
+    }
 
-        // Use flood-fill to count enclosed areas
-        int areaCount = 0;
+    int countConnectedComponents() {
         Set<String> visited = new HashSet<>();
-
-        for (String node : visitedNodes) {
-            if (!visited.contains(node)) {
-                if (floodFill(node, visited)) {
-                    areaCount++;
+        int count = 0;
+        for (String v : vertices) {
+            if (!visited.contains(v)) {
+                count++;
+                Queue<String> queue = new LinkedList<>();
+                queue.add(v);
+                visited.add(v);
+                while (!queue.isEmpty()) {
+                    String current = queue.poll();
+                    for (String neighbor : adjacency.getOrDefault(current, new ArrayList<>())) {
+                        if (!visited.contains(neighbor)) {
+                            visited.add(neighbor);
+                            queue.add(neighbor);
+                        }
+                    }
                 }
             }
         }
-
-        return areaCount;
-    }
-
-    // Encode a node (x, y) as a string
-    private String encode(int x, int y) {
-        return x + "," + y;
-    }
-
-    // Encode an edge between (x1, y1) and (x2, y2) as a string
-    private String encodeEdge(int x1, int y1, int x2, int y2) {
-        return x1 + "," + y1 + "-" + x2 + "," + y2;
-    }
-
-    // Flood-fill to check if the area is enclosed
-    private boolean floodFill(String start, Set<String> visited) {
-        Queue<String> queue = new LinkedList<>();
-        queue.add(start);
-        visited.add(start);
-
-        boolean isEnclosed = true;
-
-        while (!queue.isEmpty()) {
-            String current = queue.poll();
-            String[] parts = current.split(",");
-            int x = Integer.parseInt(parts[0]);
-            int y = Integer.parseInt(parts[1]);
-
-            // Check neighbors
-            for (int i = 0; i < 4; i++) {
-                int nx = x + (i == 0 ? 1 : i == 1 ? -1 : 0);
-                int ny = y + (i == 2 ? 1 : i == 3 ? -1 : 0);
-
-                String neighbor = encode(nx, ny);
-                String edge = encodeEdge(x, y, nx, ny);
-
-                // If the edge is not part of the drawn path, it's open
-                if (!edges.contains(edge)) {
-                    isEnclosed = false;
-                } else if (!visited.contains(neighbor)) {
-                    visited.add(neighbor);
-                    queue.add(neighbor);
-                }
-            }
-        }
-
-        return isEnclosed;
+        return count;
     }
 
     public static void main(String[] args) {
-        int sol = -1;
-
         Main m = new Main();
-        m.InputData(); // Input
+        m.InputData();
+        m.simulatePath();
 
-        sol = m.calculateAreas(); // Calculate areas
+        int V = m.vertices.size();
+        int E = m.edges.size();
+        int C = m.countConnectedComponents();
 
-        System.out.print(sol); // Output result
+        int enclosed = E - V + C;
+        System.out.println(Math.max(enclosed, 0));
     }
 }
